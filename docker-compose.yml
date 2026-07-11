@@ -1,0 +1,55 @@
+name: complaintme-ai
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: complaintme-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-complaintme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-complaintme}
+      POSTGRES_DB: ${POSTGRES_DB:-complaintme}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-complaintme} -d ${POSTGRES_DB:-complaintme}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    container_name: complaintme-backend
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-complaintme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-complaintme}
+      POSTGRES_DB: ${POSTGRES_DB:-complaintme}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: complaintme-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
