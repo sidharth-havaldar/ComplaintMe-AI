@@ -2,117 +2,185 @@
 
 # ComplaintMe AI
 
-Version: 0.1.0
+**Version:** 0.1.0
 
-Database: PostgreSQL
+**Database:** PostgreSQL
 
-Architecture: Relational
+**Architecture:** Relational (Normalized)
 
-Status: Planning
+**Status:** Approved
 
 ---
 
 # Overview
 
-ComplaintMe AI stores user complaints separately from AI-generated analysis.
+ComplaintMe AI is designed using a normalized relational database that separates user-generated data from AI-generated intelligence.
 
-This allows:
+The architecture supports:
 
-- Multiple AI analyses for one complaint
-- Future AI model upgrades
-- Analysis history
-- Better auditing
-- Enterprise integrations
+- Multiple AI analyses per complaint
+- AI model versioning
+- Organization mapping
+- Future enterprise integrations
+- Historical tracking
+- Auditability
+- Scalability
 
 ---
 
-# Database Relationships
+# Entity Relationship Diagram
 
 ```
-User
- │
- │ 1:N
- ▼
-Complaint
- │
- ├───────────────┐
- │               │
- ▼               ▼
-AI Analysis   Attachment
- │
- ▼
-Analysis History (Future)
+                           Users
+                             │
+                             │ 1:N
+                             ▼
+                        Complaints
+                    ┌──────┼───────────┐
+                    │      │           │
+                    ▼      ▼           ▼
+              Organizations  Attachments
+                    │
+                    ▼
+            Complaint Categories
 
-Complaint
- │
- ▼
+Complaints
+      │
+      │ 1:N
+      ▼
+Complaint AI Analysis
+      │
+      ├─────────────┐
+      ▼             ▼
+Expectation Gap   Complaint Tags
+
+Complaints
+      │
+      ▼
 Status History
 
-Complaint
- │
- ▼
-Category
+Users
+      │
+      ▼
+Audit Logs
 ```
 
 ---
 
-# Tables
+# Core Tables
+
+---
 
 ## users
 
-Stores registered users.
+Stores all registered users.
 
-Fields
+### Fields
 
 - id (UUID)
 - full_name
 - email
+- role
 - created_at
 - updated_at
+
+### Roles
+
+- User
+- Admin
+- Moderator
+
+---
+
+## organizations
+
+Stores companies, institutions, and government departments.
+
+### Fields
+
+- id (UUID)
+- name
+- organization_type
+- industry
+- website (nullable)
+- created_at
+- updated_at
+
+### Examples
+
+- Jio
+- Amazon
+- Airtel
+- Karnataka Electricity Board
+- XYZ University
+
+---
+
+## complaint_categories
+
+Stores predefined complaint categories.
+
+### Fields
+
+- id (UUID)
+- name
+- description
+- created_at
+
+### Examples
+
+- Internet
+- Banking
+- Healthcare
+- Water Supply
+- Electricity
+- Delivery
 
 ---
 
 ## complaints
 
-Stores user complaints.
+Stores complaints submitted by users.
 
-Fields
+### Fields
 
-- id
-- user_id
+- id (UUID)
+- user_id (FK)
+- organization_id (FK, nullable)
+- category_id (FK, nullable)
+- title (nullable)
 - description
+- language
+- source
 - current_status
 - created_at
 - updated_at
+- deleted_at (nullable)
 
-Relationship
+### Sources
 
-One User
-
-↓
-
-Many Complaints
+- Website
+- Mobile App
+- API
+- Email
+- Import
 
 ---
 
 ## complaint_ai_analysis
 
-Stores every AI analysis.
+Stores every AI analysis generated for a complaint.
 
-Relationship
+A complaint may have multiple AI analyses.
 
-One Complaint
+### Fields
 
-↓
-
-Many AI Analyses
-
-Fields
-
-- id
-- complaint_id
+- id (UUID)
+- complaint_id (FK)
 - ai_provider
 - ai_model
+- analysis_version
+- analysis_status
 - category
 - sentiment
 - priority
@@ -121,32 +189,104 @@ Fields
 - gap_score
 - summary
 - confidence_score
-- processing_time
+- processing_time_ms
 - prompt_version
 - created_at
 
+### Status
+
+- Pending
+- Completed
+- Failed
+- Retried
+
 ---
 
-## complaint_categories
+## expectation_gap
 
-Stores complaint categories.
+Stores expectation vs. reality measurements.
 
-Examples
+### Fields
 
-- Internet
-- Banking
-- Water
-- Electricity
-- Healthcare
-- Delivery
+- id (UUID)
+- analysis_id (FK)
+- expectation
+- actual_outcome
+- gap_score
+- created_at
+
+### Example
+
+Expected Speed
+
+100 Mbps
+
+Actual Speed
+
+20 Mbps
+
+Gap Score
+
+80%
+
+---
+
+## complaint_tags
+
+Stores AI-generated searchable tags.
+
+### Fields
+
+- id (UUID)
+- analysis_id (FK)
+- tag
+
+### Example Tags
+
+- internet
+- wifi
+- router
+- delay
+- refund
+- billing
+
+---
+
+## attachments
+
+Stores uploaded files.
+
+### Fields
+
+- id (UUID)
+- complaint_id (FK)
+- file_url
+- file_name
+- file_type
+- uploaded_at
+
+### Supported Types
+
+- Images
+- PDF
+- Documents
 
 ---
 
 ## complaint_status_history
 
-Tracks status changes.
+Tracks complaint status changes.
 
-Example
+### Fields
+
+- id (UUID)
+- complaint_id (FK)
+- old_status
+- new_status
+- updated_by
+- updated_at
+
+### Example
 
 Pending
 
@@ -162,131 +302,152 @@ Resolved
 
 Closed
 
-Fields
-
-- id
-- complaint_id
-- old_status
-- new_status
-- updated_by
-- updated_at
-
----
-
-## attachments
-
-Stores uploaded files.
-
-Supported
-
-- Images
-- PDFs
-- Documents
-
-Fields
-
-- id
-- complaint_id
-- file_url
-- file_type
-- uploaded_at
-
 ---
 
 ## audit_logs
 
-Tracks important actions.
+Stores important system events.
 
-Examples
+### Fields
 
-- Complaint Created
-- Complaint Deleted
-- Analysis Generated
+- id (UUID)
+- user_id (FK)
+- action
+- entity
+- entity_id
+- ip_address
+- created_at
+
+### Example Actions
+
 - Login
+- Logout
+- Complaint Created
+- Complaint Updated
+- Analysis Generated
 - Admin Action
 
 ---
 
 # Relationships
 
-users
+Users
 
 1 → N
 
-complaints
+Complaints
 
-complaints
-
-1 → N
-
-complaint_ai_analysis
-
-complaints
+Organizations
 
 1 → N
 
-attachments
+Complaints
 
-complaints
+Complaint Categories
 
 1 → N
 
-complaint_status_history
+Complaints
+
+Complaints
+
+1 → N
+
+Complaint AI Analysis
+
+Complaint AI Analysis
+
+1 → N
+
+Complaint Tags
+
+Complaint AI Analysis
+
+1 → 1
+
+Expectation Gap
+
+Complaints
+
+1 → N
+
+Attachments
+
+Complaints
+
+1 → N
+
+Status History
+
+Users
+
+1 → N
+
+Audit Logs
 
 ---
 
-# AI Analysis Versioning
-
-Every analysis is stored separately.
-
-Example
+# AI Versioning Strategy
 
 Complaint
 
 ↓
 
-GPT-5.5 Analysis
+Analysis v1 (GPT)
 
 ↓
 
-Claude Analysis
+Analysis v2 (Claude)
 
 ↓
 
-Improved Prompt Analysis
+Analysis v3 (Improved Prompt)
 
-No previous analysis is overwritten.
+Older analyses are never overwritten.
+
+This enables:
+
+- Model comparison
+- Prompt comparison
+- Regression testing
+- AI auditing
 
 ---
 
 # Indexes
 
-Create indexes on:
+Create indexes for:
 
 - email
 - user_id
+- organization_id
 - complaint_id
+- category_id
 - current_status
+- language
+- source
 - created_at
-- category
+- gap_score
 
 ---
 
-# Future Tables
+# UUID Strategy
 
-organizations
+Every table uses UUIDs.
 
-api_keys
+Never integer IDs.
 
-tenants
+---
 
-notifications
+# Soft Delete Strategy
 
-complaint_votes
+Complaints should never be permanently removed.
 
-review_analysis
+Use
 
-survey_analysis
+deleted_at
+
+instead.
 
 ---
 
@@ -302,65 +463,61 @@ Foreign Keys
 
 Examples
 
-user_id
-
-complaint_id
-
-organization_id
-
----
-
-# Soft Delete
-
-Complaint records should never be permanently deleted.
-
-Use
-
-deleted_at
-
-instead.
+- user_id
+- complaint_id
+- category_id
+- organization_id
 
 ---
 
-# UUID
+# Timestamp Convention
 
-Every table uses UUIDs.
+Every table contains
 
-Never integer IDs.
+- created_at
+- updated_at
 
----
+Optional
 
-# Timestamps
-
-Every table should contain
-
-created_at
-
-updated_at
-
-Future
-
-deleted_at
+- deleted_at
 
 ---
 
 # Design Principles
 
-- Normalize data
-- Avoid duplication
-- Store AI separately
-- Version AI results
-- Prepare for enterprise use
-- API-first database design
+- Third Normal Form (3NF)
+- API-First
+- AI Data Isolation
+- Versioned AI Analysis
+- Auditability
+- Enterprise Ready
+- Scalable by Design
 
 ---
 
-# Future Enterprise Support
+# Future Expansion
 
-Database design supports:
+The database is intentionally designed to support future additions without major schema redesign.
 
-- Multi-tenancy
-- Organization dashboards
-- API integrations
-- AI model comparisons
-- Analytics
+Planned future modules include:
+
+- Multi-Tenant Organizations
+- Enterprise Dashboards
+- Public API Keys
+- Review Intelligence
+- Survey Intelligence
+- Employee Feedback Intelligence
+- Voice Complaint Analysis
+- AI Recommendation Engine
+
+---
+
+# Database Philosophy
+
+User data and AI-generated intelligence are treated as separate domains.
+
+User data represents facts.
+
+AI data represents interpretations.
+
+Keeping them independent ensures transparency, auditability, and future AI model improvements without data loss.
