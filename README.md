@@ -224,7 +224,9 @@ Contributions will be opened after the MVP release.
 
 # License
 
-MIT License
+This project is currently proprietary and under active development.
+
+Licensing terms may change in future releases.
 
 ---
 
