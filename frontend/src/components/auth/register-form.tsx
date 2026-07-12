@@ -13,22 +13,33 @@ import { toFriendlyAuthError } from "@/lib/auth-errors";
 import { getSupabaseClient } from "@/lib/supabase";
 import { isValidEmail } from "@/lib/validation";
 
+const PASSWORD_MIN_LENGTH = 8;
+
 type FieldErrors = {
+  fullName?: string;
   email?: string;
   password?: string;
+  confirmPassword?: string;
 };
 
-export function LoginForm() {
+export function RegisterForm() {
   const router = useRouter();
 
+  const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
   const [fieldErrors, setFieldErrors] = React.useState<FieldErrors>({});
   const [formError, setFormError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [confirmationSent, setConfirmationSent] = React.useState(false);
 
   function validate(): boolean {
     const errors: FieldErrors = {};
+
+    if (!fullName.trim()) {
+      errors.fullName = "Full name is required.";
+    }
 
     if (!email.trim()) {
       errors.email = "Email is required.";
@@ -38,6 +49,14 @@ export function LoginForm() {
 
     if (!password) {
       errors.password = "Password is required.";
+    } else if (password.length < PASSWORD_MIN_LENGTH) {
+      errors.password = `Password must be at least ${PASSWORD_MIN_LENGTH} characters.`;
+    }
+
+    if (!confirmPassword) {
+      errors.confirmPassword = "Please confirm your password.";
+    } else if (confirmPassword !== password) {
+      errors.confirmPassword = "Passwords do not match.";
     }
 
     setFieldErrors(errors);
@@ -58,9 +77,12 @@ export function LoginForm() {
     setIsLoading(true);
     try {
       const supabase = getSupabaseClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
+        options: {
+          data: { full_name: fullName.trim() },
+        },
       });
 
       if (error) {
@@ -68,7 +90,21 @@ export function LoginForm() {
         return;
       }
 
-      router.replace("/dashboard");
+      // Supabase obfuscates duplicate sign-ups: an existing confirmed email
+      // returns a user with no identities instead of an error.
+      if (data.user && data.user.identities?.length === 0) {
+        setFormError("An account with this email already exists.");
+        return;
+      }
+
+      if (data.session) {
+        // Email confirmation disabled — the user is signed in.
+        router.replace("/dashboard");
+        return;
+      }
+
+      // Email confirmation enabled — instruct the user, do not redirect.
+      setConfirmationSent(true);
     } catch {
       setFormError("Unable to reach the authentication service. Please try again.");
     } finally {
@@ -76,9 +112,38 @@ export function LoginForm() {
     }
   }
 
+  if (confirmationSent) {
+    return (
+      <FormAlert variant="success">
+        Account created. We&apos;ve sent a confirmation link to <strong>{email.trim()}</strong> —
+        please verify your email to finish setting up your account.
+      </FormAlert>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
       {formError && <FormAlert>{formError}</FormAlert>}
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="full-name">Full name</Label>
+        <Input
+          id="full-name"
+          type="text"
+          autoComplete="name"
+          placeholder="Your full name"
+          value={fullName}
+          onChange={(event) => setFullName(event.target.value)}
+          disabled={isLoading}
+          aria-invalid={Boolean(fieldErrors.fullName)}
+          aria-describedby={fieldErrors.fullName ? "full-name-error" : undefined}
+        />
+        {fieldErrors.fullName && (
+          <p id="full-name-error" role="alert" className="text-destructive text-sm">
+            {fieldErrors.fullName}
+          </p>
+        )}
+      </div>
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">Email</Label>
@@ -104,8 +169,8 @@ export function LoginForm() {
         <Label htmlFor="password">Password</Label>
         <PasswordInput
           id="password"
-          autoComplete="current-password"
-          placeholder="Your password"
+          autoComplete="new-password"
+          placeholder="At least 8 characters"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           disabled={isLoading}
@@ -119,14 +184,33 @@ export function LoginForm() {
         )}
       </div>
 
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="confirm-password">Confirm password</Label>
+        <PasswordInput
+          id="confirm-password"
+          autoComplete="new-password"
+          placeholder="Repeat your password"
+          value={confirmPassword}
+          onChange={(event) => setConfirmPassword(event.target.value)}
+          disabled={isLoading}
+          aria-invalid={Boolean(fieldErrors.confirmPassword)}
+          aria-describedby={fieldErrors.confirmPassword ? "confirm-password-error" : undefined}
+        />
+        {fieldErrors.confirmPassword && (
+          <p id="confirm-password-error" role="alert" className="text-destructive text-sm">
+            {fieldErrors.confirmPassword}
+          </p>
+        )}
+      </div>
+
       <Button type="submit" disabled={isLoading} className="w-full">
         {isLoading ? (
           <>
             <Loader2 aria-hidden="true" className="size-4 animate-spin" />
-            Signing in…
+            Creating account…
           </>
         ) : (
-          "Sign in"
+          "Create account"
         )}
       </Button>
     </form>
