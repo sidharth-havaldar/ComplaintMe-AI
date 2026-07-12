@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     # CORS — comma-separated list of allowed origins
     CORS_ORIGINS: str = "http://localhost:3000"
 
+    # Supabase (verification implemented in AUTH-002)
+    SUPABASE_URL: str = ""
+    SUPABASE_JWT_SECRET: str = ""
+
     # Database
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
