@@ -18,12 +18,20 @@ export default function LoginPage() {
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         <LoginForm />
-        <p className="text-muted-foreground text-center text-sm">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-primary underline-offset-4 hover:underline">
-            Create one
+        <div className="flex flex-col gap-2 text-center text-sm">
+          <Link
+            href="/forgot-password"
+            className="text-primary underline-offset-4 hover:underline"
+          >
+            Forgot password?
           </Link>
-        </p>
+          <p className="text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="text-primary underline-offset-4 hover:underline">
+              Create one
+            </Link>
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
