@@ -50,6 +50,37 @@ export async function createComplaint(description: string): Promise<Complaint> {
 }
 
 /**
+ * Fetch a single complaint by id for its detail page. Read-only; calls the
+ * existing GET /complaints/{id} endpoint — no backend or API changes are
+ * introduced here. Throws `ComplaintNotFoundError` on 404 so the UI can render
+ * a dedicated "not found" state.
+ */
+export async function getComplaint(id: string): Promise<Complaint> {
+  const response = await fetch(`${API_BASE_URL}/complaints/${id}`, {
+    method: "GET",
+    headers: await buildHeaders(),
+  });
+
+  if (response.status === 404) {
+    throw new ComplaintNotFoundError(id);
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to load complaint (status ${response.status}).`);
+  }
+
+  return (await response.json()) as Complaint;
+}
+
+/** Raised by {@link getComplaint} when the requested complaint does not exist. */
+export class ComplaintNotFoundError extends Error {
+  constructor(id: string) {
+    super(`Complaint ${id} was not found.`);
+    this.name = "ComplaintNotFoundError";
+  }
+}
+
+/**
  * List the current user's complaints, newest first, for the dashboard's
  * "Recent Complaints" surface. Read-only; calls the existing GET /complaints
  * endpoint — no backend or API changes are introduced here.

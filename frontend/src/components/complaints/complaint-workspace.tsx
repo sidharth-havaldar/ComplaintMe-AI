@@ -1,0 +1,803 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
+import {
+  ArrowLeft,
+  BadgeCheck,
+  Boxes,
+  Building2,
+  Check,
+  Circle,
+  Clock,
+  Copy,
+  FileText,
+  Flag,
+  Flame,
+  Gauge,
+  Heart,
+  Languages,
+  Layers,
+  Lightbulb,
+  LineChart,
+  Loader2,
+  Package,
+  ScanSearch,
+  Share2,
+  Sparkles,
+  Tag,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+
+import { fadeUp, staggerContainer } from "@/components/dashboard/motion";
+import { LogoMark, Wordmark } from "@/components/logo";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ComplaintNotFoundError, getComplaint, type Complaint } from "@/lib/api";
+import { cn } from "@/lib/utils";
+
+/**
+ * UI-004 — the Cortexa Intelligence Workspace.
+ *
+ * The complaint detail surface. It reads a single complaint through the existing
+ * read-only GET /complaints/{id} endpoint (via {@link getComplaint}) and frames
+ * it as a premium "AI has finished reasoning" workspace: the original complaint
+ * on the left, Cortexa's structured analysis on the right, an animated pipeline
+ * timeline, and a preview of upcoming intelligence.
+ *
+ * Presentation only. There are NO backend, API, auth, routing or business-logic
+ * changes here. The AI analysis fields have no backend source yet, so they are
+ * rendered as elegant "Waiting for AI analysis…" placeholders rather than empty
+ * cards — the layout is ready for real data the moment the model produces it.
+ */
+
+type LoadState = "loading" | "ready" | "notfound" | "error";
+
+/** Where the complaint sits in the (future) analysis pipeline. */
+type AnalysisPhase = "pending" | "analyzing" | "completed";
+
+export function ComplaintWorkspace({ id }: { id: string }) {
+  const [state, setState] = React.useState<LoadState>("loading");
+  const [complaint, setComplaint] = React.useState<Complaint | null>(null);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    setState("loading");
+
+    getComplaint(id)
+      .then((data) => {
+        if (cancelled) return;
+        setComplaint(data);
+        setState("ready");
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        setState(error instanceof ComplaintNotFoundError ? "notfound" : "error");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  return (
+    <MotionConfig reducedMotion="user">
+      <main className="bg-background bg-ambient relative min-h-svh">
+        <div className="mx-auto flex w-full max-w-[1400px] flex-col px-5 pb-24 sm:px-8">
+          {/* Slim top bar: brand home + return path. */}
+          <header className="flex items-center justify-between py-5">
+            <Link
+              href="/dashboard"
+              aria-label="ComplaintMe AI — back to dashboard"
+              className="rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+            >
+              <Wordmark />
+            </Link>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/dashboard">
+                <ArrowLeft aria-hidden="true" className="size-4" />
+                Dashboard
+              </Link>
+            </Button>
+          </header>
+
+          {state === "loading" && <WorkspaceSkeleton />}
+          {state === "notfound" && <NotFoundState />}
+          {state === "error" && <ErrorState />}
+          {state === "ready" && complaint && <IntelligenceView complaint={complaint} />}
+        </div>
+      </main>
+    </MotionConfig>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Main view                                                                 */
+/* -------------------------------------------------------------------------- */
+
+function IntelligenceView({ complaint }: { complaint: Complaint }) {
+  const phase = analysisPhase(complaint.current_status);
+
+  return (
+    <motion.div
+      variants={staggerContainer}
+      initial="hidden"
+      animate="show"
+      className="flex flex-col gap-10 pt-4 sm:pt-8"
+    >
+      <PageHeader phase={phase} />
+
+      {/* Original complaint (left) + Cortexa analysis (right). */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-8">
+        <OriginalComplaintCard complaint={complaint} />
+        <CortexaAnalysisCard phase={phase} />
+      </div>
+
+      <AnalysisTimeline phase={phase} />
+
+      <FutureInsights />
+    </motion.div>
+  );
+}
+
+function PageHeader({ phase }: { phase: AnalysisPhase }) {
+  return (
+    <motion.div variants={fadeUp} className="flex flex-col gap-4">
+      <div className="text-muted-foreground flex items-center gap-2.5 text-sm font-medium">
+        <LogoMark className="size-6 rounded-lg [&_svg]:size-3.5" />
+        <span>
+          Generated by <span className="text-brand">Cortexa</span>
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="font-heading text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
+          Complaint Intelligence
+        </h1>
+        <StatusBadge phase={phase} />
+      </div>
+      <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
+        A structured, executive-ready view of this complaint — the original report alongside
+        Cortexa’s understanding of who, what and how urgent.
+      </p>
+    </motion.div>
+  );
+}
+
+/** Animated status pill: Pending / Analyzing / Completed. */
+function StatusBadge({ phase }: { phase: AnalysisPhase }) {
+  const config = {
+    pending: { label: "Pending", variant: "muted" as const, dot: "bg-muted-foreground" },
+    analyzing: { label: "Analyzing", variant: "brand" as const, dot: "bg-brand" },
+    completed: { label: "Completed", variant: "success" as const, dot: "bg-success" },
+  }[phase];
+
+  return (
+    <Badge variant={config.variant} className="gap-2 px-3 py-1 text-sm" aria-live="polite">
+      <span className="relative flex size-2" aria-hidden="true">
+        {phase !== "completed" && (
+          <span
+            className={cn(
+              "absolute inline-flex h-full w-full rounded-full opacity-60",
+              phase === "analyzing" && "animate-ping motion-reduce:animate-none",
+              config.dot
+            )}
+          />
+        )}
+        <span className={cn("relative inline-flex size-2 rounded-full", config.dot)} />
+      </span>
+      {config.label}
+    </Badge>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Left column — original complaint                                          */
+/* -------------------------------------------------------------------------- */
+
+function OriginalComplaintCard({ complaint }: { complaint: Complaint }) {
+  const [copied, setCopied] = React.useState(false);
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(
+    () => () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    },
+    []
+  );
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(complaint.description);
+      setCopied(true);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard can be unavailable (e.g. insecure context); fail silently.
+    }
+  }
+
+  return (
+    <motion.section
+      variants={fadeUp}
+      aria-labelledby="original-heading"
+      className="border-border/70 bg-card/70 flex flex-col gap-5 rounded-3xl border p-6 shadow-lg shadow-black/[0.03] backdrop-blur-xl sm:p-7 dark:shadow-black/20"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <span className="border-border/70 bg-muted/50 text-foreground/70 flex size-8 shrink-0 items-center justify-center rounded-xl border">
+            <FileText aria-hidden="true" className="size-4" />
+          </span>
+          <h2 id="original-heading" className="font-heading text-base font-semibold tracking-tight">
+            Original Complaint
+          </h2>
+        </div>
+        <time
+          dateTime={complaint.created_at}
+          className="text-muted-foreground text-xs tabular-nums"
+        >
+          {formatDateTime(complaint.created_at)}
+        </time>
+      </div>
+
+      {/* The complaint itself — the source of truth. */}
+      <blockquote className="border-brand/30 text-foreground/90 border-l-2 pl-4 text-[0.95rem] leading-relaxed whitespace-pre-wrap">
+        {complaint.title?.trim() && (
+          <span className="text-foreground mb-1 block font-medium">{complaint.title}</span>
+        )}
+        {complaint.description}
+      </blockquote>
+
+      {/* Metadata grid. */}
+      <dl className="border-border/60 grid grid-cols-2 gap-x-4 gap-y-4 border-t pt-5 text-sm">
+        <MetaItem label="Complaint ID" value={`#${complaint.id.slice(0, 8).toUpperCase()}`} mono />
+        <MetaItem label="Submitted" value={formatDate(complaint.created_at)} />
+        <MetaItem label="Company" placeholder />
+        <MetaItem label="Product" placeholder />
+      </dl>
+
+      {/* Actions. */}
+      <div className="border-border/60 flex flex-wrap items-center gap-2 border-t pt-5">
+        <Button variant="outline" size="sm" onClick={handleCopy} aria-live="polite">
+          <AnimatePresence mode="wait" initial={false}>
+            {copied ? (
+              <motion.span
+                key="copied"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.15 }}
+                className="text-success inline-flex items-center gap-1.5"
+              >
+                <Check aria-hidden="true" className="size-3.5" />
+                Copied
+              </motion.span>
+            ) : (
+              <motion.span
+                key="copy"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.15 }}
+                className="inline-flex items-center gap-1.5"
+              >
+                <Copy aria-hidden="true" className="size-3.5" />
+                Copy
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </Button>
+
+        <button
+          type="button"
+          disabled
+          aria-label="Share (coming soon)"
+          className="border-border/70 bg-muted/40 text-muted-foreground inline-flex cursor-not-allowed items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.8rem] font-medium"
+        >
+          <Share2 aria-hidden="true" className="size-3.5" />
+          Share
+          <span className="text-muted-foreground/60">· Soon</span>
+        </button>
+      </div>
+    </motion.section>
+  );
+}
+
+/** One entry in the complaint metadata grid. */
+function MetaItem({
+  label,
+  value,
+  placeholder = false,
+  mono = false,
+}: {
+  label: string;
+  value?: string;
+  placeholder?: boolean;
+  mono?: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <dt className="text-muted-foreground text-xs font-medium">{label}</dt>
+      <dd className={cn("text-foreground/90 text-sm", mono && "font-mono tabular-nums")}>
+        {placeholder ? <WaitingValue compact /> : value}
+      </dd>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Right column — Cortexa analysis                                           */
+/* -------------------------------------------------------------------------- */
+
+/** Scalar attributes Cortexa will infer, shown as a two-column grid. */
+const ANALYSIS_FIELDS: { icon: IconType; label: string }[] = [
+  { icon: Building2, label: "Company" },
+  { icon: Package, label: "Product" },
+  { icon: Tag, label: "Category" },
+  { icon: Users, label: "Department" },
+  { icon: Gauge, label: "Sentiment" },
+  { icon: Heart, label: "Emotion" },
+  { icon: Flame, label: "Severity" },
+  { icon: Flag, label: "Priority" },
+  { icon: Languages, label: "Language" },
+];
+
+function CortexaAnalysisCard({ phase }: { phase: AnalysisPhase }) {
+  return (
+    <motion.section
+      variants={fadeUp}
+      aria-labelledby="analysis-heading"
+      className="relative flex flex-col gap-6 overflow-hidden rounded-3xl border border-brand/20 bg-gradient-to-b from-card/80 to-brand/[0.04] p-6 shadow-xl shadow-brand/5 backdrop-blur-xl sm:p-7 dark:from-card/70 dark:shadow-black/20"
+    >
+      {/* Ambient brand glow behind the AI card. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(28rem_18rem_at_100%_0%,color-mix(in_oklch,var(--brand)_12%,transparent),transparent_70%)]"
+      />
+
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <LogoMark className="size-10 rounded-2xl [&_svg]:size-5" />
+          <div className="flex flex-col">
+            <h2
+              id="analysis-heading"
+              className="font-heading text-base font-semibold tracking-tight"
+            >
+              Cortexa Analysis
+            </h2>
+            <p className="text-muted-foreground text-xs">Structured intelligence</p>
+          </div>
+        </div>
+        <StatusBadge phase={phase} />
+      </div>
+
+      {/* Empty-state framing so the card never reads as broken. */}
+      <div className="border-brand/15 bg-brand/[0.04] text-muted-foreground flex items-center gap-2.5 rounded-2xl border border-dashed px-4 py-3 text-sm">
+        <Sparkles aria-hidden="true" className="text-brand size-4 shrink-0" />
+        <span>Cortexa is waiting for the first analysis of this complaint.</span>
+      </div>
+
+      {/* Scalar attributes. */}
+      <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+        {ANALYSIS_FIELDS.map((field) => (
+          <AnalysisField key={field.label} icon={field.icon} label={field.label} />
+        ))}
+      </div>
+
+      {/* Entities. */}
+      <div className="border-border/50 flex flex-col gap-2 border-t pt-5">
+        <FieldLabel icon={Boxes} label="Entities" />
+        <div className="flex flex-wrap gap-2" aria-hidden="true">
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              className="border-border/60 bg-muted/40 h-6 rounded-full border"
+              style={{ width: `${5 + i * 1.5}rem` }}
+            />
+          ))}
+        </div>
+        <WaitingValue compact />
+      </div>
+
+      {/* Summary. */}
+      <div className="border-border/50 flex flex-col gap-2.5 border-t pt-5">
+        <FieldLabel icon={FileText} label="Executive Summary" />
+        <div className="flex flex-col gap-2" aria-hidden="true">
+          <span className="bg-muted/50 block h-3 w-full rounded-full" />
+          <span className="bg-muted/50 block h-3 w-[92%] rounded-full" />
+          <span className="bg-muted/50 block h-3 w-[70%] rounded-full" />
+        </div>
+        <WaitingValue />
+      </div>
+
+      {/* Confidence meter. */}
+      <div className="border-border/50 flex flex-col gap-2.5 border-t pt-5">
+        <div className="flex items-center justify-between">
+          <FieldLabel icon={BadgeCheck} label="Confidence" />
+          <span className="text-muted-foreground/70 text-xs italic">Pending</span>
+        </div>
+        <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full" aria-hidden="true">
+          <div className="from-brand/40 h-full w-0 rounded-full bg-gradient-to-r to-brand/20" />
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+/** A single Cortexa attribute (icon chip + label + waiting placeholder). */
+function AnalysisField({ icon: Icon, label }: { icon: IconType; label: string }) {
+  return (
+    <div className="border-border/50 bg-card/40 flex items-center gap-3 rounded-2xl border p-3">
+      <span className="border-brand/15 bg-brand/10 text-brand flex size-9 shrink-0 items-center justify-center rounded-xl border">
+        <Icon aria-hidden="true" className="size-4" />
+      </span>
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <span className="text-muted-foreground text-xs font-medium">{label}</span>
+        <WaitingValue compact />
+      </div>
+    </div>
+  );
+}
+
+/** Small labeled header used inside the analysis card. */
+function FieldLabel({ icon: Icon, label }: { icon: IconType; label: string }) {
+  return (
+    <span className="text-foreground/80 flex items-center gap-2 text-sm font-medium">
+      <Icon aria-hidden="true" className="text-muted-foreground size-4" />
+      {label}
+    </span>
+  );
+}
+
+/** Elegant "waiting for the model" placeholder — never an empty field. */
+function WaitingValue({ compact = false }: { compact?: boolean }) {
+  return (
+    <span
+      className={cn(
+        "text-muted-foreground/70 inline-flex items-center gap-1.5 italic",
+        compact ? "text-xs" : "text-sm"
+      )}
+    >
+      <span className="relative flex size-1.5 shrink-0" aria-hidden="true">
+        <span className="bg-brand/50 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 motion-reduce:animate-none" />
+        <span className="bg-brand/60 relative inline-flex size-1.5 rounded-full" />
+      </span>
+      Waiting for AI analysis…
+    </span>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Timeline                                                                  */
+/* -------------------------------------------------------------------------- */
+
+type StepState = "done" | "active" | "upcoming";
+
+function AnalysisTimeline({ phase }: { phase: AnalysisPhase }) {
+  const steps: { label: string; description: string; state: StepState }[] = [
+    { label: "Complaint Submitted", description: "Your report reached Cortexa.", state: "done" },
+    {
+      label: "Stored Successfully",
+      description: "Encrypted and saved to your workspace.",
+      state: "done",
+    },
+    {
+      label: "AI Analysis",
+      description:
+        phase === "completed"
+          ? "Cortexa understood your complaint."
+          : "Cortexa will extract structure and intent.",
+      state: phase === "completed" ? "done" : "active",
+    },
+    {
+      label: "Recommendations",
+      description: "Suggested next steps and resolutions.",
+      state: phase === "completed" ? "active" : "upcoming",
+    },
+    { label: "Resolution", description: "Complaint closed and confirmed.", state: "upcoming" },
+  ];
+
+  // Progress fill: fraction of the track up to the last completed node.
+  const lastDone = steps.reduce((acc, step, i) => (step.state === "done" ? i : acc), 0);
+  const progress = steps.length > 1 ? (lastDone / (steps.length - 1)) * 100 : 0;
+
+  return (
+    <motion.section
+      variants={fadeUp}
+      aria-labelledby="timeline-heading"
+      className="border-border/70 bg-card/70 flex flex-col gap-6 rounded-3xl border p-6 shadow-lg shadow-black/[0.03] backdrop-blur-xl sm:p-7 dark:shadow-black/20"
+    >
+      <div className="flex items-center gap-2.5">
+        <span className="border-border/70 bg-muted/50 text-foreground/70 flex size-8 shrink-0 items-center justify-center rounded-xl border">
+          <ScanSearch aria-hidden="true" className="size-4" />
+        </span>
+        <h2 id="timeline-heading" className="font-heading text-base font-semibold tracking-tight">
+          Analysis Pipeline
+        </h2>
+      </div>
+
+      <ol className="relative flex flex-col">
+        {/* Track + animated progress fill, behind the nodes. */}
+        <span
+          aria-hidden="true"
+          className="bg-border/70 absolute top-3 bottom-3 left-[15px] w-px"
+        />
+        <motion.span
+          aria-hidden="true"
+          className="from-brand absolute top-3 left-[15px] w-px bg-gradient-to-b to-success"
+          initial={{ height: 0 }}
+          animate={{ height: `calc((100% - 1.5rem) * ${progress / 100})` }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+        />
+
+        {steps.map((step, i) => (
+          <motion.li
+            key={step.label}
+            variants={fadeUp}
+            className="relative flex gap-4 pb-6 last:pb-0"
+          >
+            <TimelineNode state={step.state} index={i} />
+            <div className="flex flex-col gap-0.5 pt-0.5">
+              <span
+                className={cn(
+                  "text-sm font-medium",
+                  step.state === "upcoming" ? "text-muted-foreground" : "text-foreground"
+                )}
+              >
+                {step.label}
+              </span>
+              <span className="text-muted-foreground text-xs leading-relaxed">
+                {step.description}
+              </span>
+            </div>
+          </motion.li>
+        ))}
+      </ol>
+    </motion.section>
+  );
+}
+
+function TimelineNode({ state, index }: { state: StepState; index: number }) {
+  return (
+    <span className="relative z-10 flex size-8 shrink-0 items-center justify-center">
+      {state === "active" && (
+        <motion.span
+          aria-hidden="true"
+          className="bg-brand/20 absolute inline-flex size-8 rounded-full"
+          animate={{ scale: [1, 1.35, 1], opacity: [0.6, 0, 0.6] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+        />
+      )}
+      <motion.span
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.15 + index * 0.08 }}
+        className={cn(
+          "relative flex size-8 items-center justify-center rounded-full border",
+          state === "done" && "border-success/30 bg-success/12 text-success",
+          state === "active" && "border-brand/40 bg-brand/15 text-brand",
+          state === "upcoming" && "border-border bg-muted/60 text-muted-foreground/60"
+        )}
+      >
+        {state === "done" && <Check aria-hidden="true" className="size-4" strokeWidth={3} />}
+        {state === "active" && <Clock aria-hidden="true" className="size-4" />}
+        {state === "upcoming" && <Circle aria-hidden="true" className="size-2.5 fill-current" />}
+      </motion.span>
+    </span>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Future insights                                                           */
+/* -------------------------------------------------------------------------- */
+
+const FUTURE_INSIGHTS: { icon: IconType; title: string; description: string }[] = [
+  {
+    icon: ScanSearch,
+    title: "Root Cause",
+    description: "Trace the underlying issue behind this complaint.",
+  },
+  {
+    icon: Layers,
+    title: "Similar Complaints",
+    description: "See patterns across related reports.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Business Impact",
+    description: "Estimate the cost and risk of inaction.",
+  },
+  {
+    icon: LineChart,
+    title: "Predictions",
+    description: "Forecast escalation and resolution likelihood.",
+  },
+  {
+    icon: Lightbulb,
+    title: "Recommendations",
+    description: "Get concrete next steps toward resolution.",
+  },
+];
+
+function FutureInsights() {
+  return (
+    <motion.section
+      variants={fadeUp}
+      aria-labelledby="insights-heading"
+      className="flex flex-col gap-5"
+    >
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id="insights-heading" className="font-heading text-lg font-semibold tracking-tight">
+          Future Insights
+        </h2>
+        <span className="text-muted-foreground text-sm">Rolling out soon</span>
+      </div>
+
+      <motion.div
+        variants={staggerContainer}
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        {FUTURE_INSIGHTS.map((insight) => (
+          <InsightCard key={insight.title} {...insight} />
+        ))}
+      </motion.div>
+    </motion.section>
+  );
+}
+
+function InsightCard({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: IconType;
+  title: string;
+  description: string;
+}) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      className={cn(
+        "group/insight border-border/70 bg-card/60 relative flex flex-col gap-3 rounded-2xl border p-5 shadow-lg shadow-black/[0.03] backdrop-blur-xl transition-all duration-200 ease-out",
+        "hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-xl dark:shadow-black/20"
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <span className="border-brand/15 bg-brand/10 text-brand flex size-10 items-center justify-center rounded-xl border transition-transform duration-200 group-hover/insight:scale-105">
+          <Icon aria-hidden="true" className="size-5" />
+        </span>
+        <Badge variant="muted" className="text-[0.7rem]">
+          Coming Soon
+        </Badge>
+      </div>
+      <h3 className="font-heading text-sm font-semibold tracking-tight">{title}</h3>
+      <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
+    </motion.div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Non-ready states                                                          */
+/* -------------------------------------------------------------------------- */
+
+function WorkspaceSkeleton() {
+  return (
+    <div className="flex flex-col gap-10 pt-4 sm:pt-8" aria-hidden="true">
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="h-12 w-80 max-w-full" />
+        <Skeleton className="h-5 w-full max-w-2xl" />
+      </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+        {[0, 1].map((i) => (
+          <div
+            key={i}
+            className="border-border/70 bg-card/60 flex flex-col gap-4 rounded-3xl border p-7"
+          >
+            <Skeleton className="h-8 w-44" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+        ))}
+      </div>
+      <div className="border-border/70 bg-card/60 flex flex-col gap-4 rounded-3xl border p-7">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-2/3" />
+      </div>
+    </div>
+  );
+}
+
+function NotFoundState() {
+  return (
+    <CenteredState
+      icon={ScanSearch}
+      title="Complaint not found"
+      description="We couldn’t find this complaint. It may have been removed, or the link is incorrect."
+    />
+  );
+}
+
+function ErrorState() {
+  return (
+    <CenteredState
+      icon={Loader2}
+      title="We couldn’t load this analysis"
+      description="Something went wrong while loading this complaint. Please refresh to try again."
+    />
+  );
+}
+
+function CenteredState({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: IconType;
+  title: string;
+  description: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      role="status"
+      className="mx-auto flex max-w-md flex-col items-center gap-4 py-24 text-center"
+    >
+      <span className="border-border/70 bg-card/60 text-muted-foreground flex size-14 items-center justify-center rounded-2xl border shadow-lg shadow-black/[0.03]">
+        <Icon aria-hidden="true" className="size-6" />
+      </span>
+      <h1 className="font-heading text-xl font-semibold tracking-tight">{title}</h1>
+      <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
+      <Button asChild variant="outline" size="sm" className="mt-2">
+        <Link href="/dashboard">
+          <ArrowLeft aria-hidden="true" className="size-4" />
+          Back to dashboard
+        </Link>
+      </Button>
+    </motion.div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
+
+type IconType = React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" }>;
+
+/** Derive the (future) analysis phase from the stored status string. */
+function analysisPhase(status: string): AnalysisPhase {
+  const s = status.toLowerCase();
+  if (s.includes("resolve") || s.includes("close") || s.includes("complete") || s.includes("done")) {
+    return "completed";
+  }
+  if (s.includes("progress") || s.includes("review") || s.includes("analyz")) {
+    return "analyzing";
+  }
+  return "pending";
+}
+
+/** Locale date like "Jul 14, 2026". Falls back to the raw string if unparseable. */
+function formatDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+/** Locale date + time like "July 14, 2026 at 3:24 PM". */
+function formatDateTime(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleString(undefined, {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
