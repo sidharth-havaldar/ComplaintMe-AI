@@ -5,7 +5,8 @@ from collections.abc import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.complaint import Complaint
+from app.db.complaint import Complaint, ComplaintAIAnalysis
+from app.repositories.ai_analysis import AIAnalysisRepository
 from app.repositories.complaint import ComplaintRepository
 from app.schemas.complaint import ComplaintCreate, ComplaintUpdate
 
@@ -16,6 +17,7 @@ class ComplaintService:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
         self._repository = ComplaintRepository(session)
+        self._analyses = AIAnalysisRepository(session)
 
     async def create(self, *, user_id: uuid.UUID, payload: ComplaintCreate) -> Complaint:
         complaint = await self._repository.create(
@@ -29,6 +31,16 @@ class ComplaintService:
 
     async def get(self, complaint_id: uuid.UUID) -> Complaint | None:
         return await self._repository.get_active(complaint_id)
+
+    async def get_with_latest_analysis(
+        self, complaint_id: uuid.UUID
+    ) -> tuple[Complaint, ComplaintAIAnalysis | None] | None:
+        """Return a complaint with its most recent Cortexa analysis, or None."""
+        complaint = await self._repository.get_active(complaint_id)
+        if complaint is None:
+            return None
+        analysis = await self._analyses.get_latest_for_complaint(complaint_id)
+        return complaint, analysis
 
     async def list(self) -> Sequence[Complaint]:
         return await self._repository.list_active()

@@ -4,29 +4,42 @@ import * as React from "react";
 import Link from "next/link";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import {
+  Activity,
+  AlertTriangle,
   ArrowLeft,
   BadgeCheck,
   Boxes,
+  BrainCircuit,
+  Briefcase,
+  Building,
   Building2,
   Check,
   Circle,
+  ClipboardList,
   Clock,
+  Compass,
   Copy,
   FileText,
   Flag,
   Flame,
   Gauge,
   Heart,
+  HelpCircle,
+  History,
   Languages,
   Layers,
   Lightbulb,
   LineChart,
   Loader2,
+  MoveRight,
   Package,
   ScanSearch,
   Share2,
+  ShieldAlert,
   Sparkles,
   Tag,
+  Target,
+  TrendingDown,
   TrendingUp,
   Users,
 } from "lucide-react";
@@ -36,7 +49,14 @@ import { LogoMark, Wordmark } from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ComplaintNotFoundError, getComplaint, type Complaint } from "@/lib/api";
+import {
+  ComplaintNotFoundError,
+  getComplaint,
+  type Complaint,
+  type ComplaintAIAnalysis,
+  type ComplaintIntelligence,
+  type DecisionIntelligence,
+} from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /**
@@ -83,6 +103,34 @@ export function ComplaintWorkspace({ id }: { id: string }) {
     };
   }, [id]);
 
+  // Cortexa analysis runs in the background after submission, so the first load
+  // may arrive before it completes. Poll a few times until the analysis lands,
+  // then stop. Transient errors are ignored — the loaded complaint still shows.
+  React.useEffect(() => {
+    if (state !== "ready" || !complaint || complaint.ai_analysis) return;
+
+    let cancelled = false;
+    let attempts = 0;
+    const interval = setInterval(async () => {
+      attempts += 1;
+      try {
+        const fresh = await getComplaint(id);
+        if (!cancelled && fresh.ai_analysis) {
+          setComplaint(fresh);
+          clearInterval(interval);
+        }
+      } catch {
+        // Ignore polling hiccups; we simply try again next tick.
+      }
+      if (attempts >= 20) clearInterval(interval);
+    }, 2500);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [state, complaint, id]);
+
   return (
     <MotionConfig reducedMotion="user">
       <main className="bg-background bg-ambient relative min-h-svh">
@@ -119,7 +167,8 @@ export function ComplaintWorkspace({ id }: { id: string }) {
 /* -------------------------------------------------------------------------- */
 
 function IntelligenceView({ complaint }: { complaint: Complaint }) {
-  const phase = analysisPhase(complaint.current_status);
+  const analysis = complaint.ai_analysis ?? null;
+  const phase: AnalysisPhase = analysis ? "completed" : "analyzing";
 
   return (
     <motion.div
@@ -132,9 +181,13 @@ function IntelligenceView({ complaint }: { complaint: Complaint }) {
 
       {/* Original complaint (left) + Cortexa analysis (right). */}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-8">
-        <OriginalComplaintCard complaint={complaint} />
-        <CortexaAnalysisCard phase={phase} />
+        <OriginalComplaintCard complaint={complaint} analysis={analysis} />
+        <CortexaAnalysisCard phase={phase} analysis={analysis} />
       </div>
+
+      <DecisionIntelligenceSection decision={analysis?.decision_intelligence ?? null} />
+
+      <ComplaintIntelligenceSection intelligence={analysis?.complaint_intelligence ?? null} />
 
       <AnalysisTimeline phase={phase} />
 
@@ -197,7 +250,13 @@ function StatusBadge({ phase }: { phase: AnalysisPhase }) {
 /*  Left column — original complaint                                          */
 /* -------------------------------------------------------------------------- */
 
-function OriginalComplaintCard({ complaint }: { complaint: Complaint }) {
+function OriginalComplaintCard({
+  complaint,
+  analysis,
+}: {
+  complaint: Complaint;
+  analysis: ComplaintAIAnalysis | null;
+}) {
   const [copied, setCopied] = React.useState(false);
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -254,8 +313,16 @@ function OriginalComplaintCard({ complaint }: { complaint: Complaint }) {
       <dl className="border-border/60 grid grid-cols-2 gap-x-4 gap-y-4 border-t pt-5 text-sm">
         <MetaItem label="Complaint ID" value={`#${complaint.id.slice(0, 8).toUpperCase()}`} mono />
         <MetaItem label="Submitted" value={formatDate(complaint.created_at)} />
-        <MetaItem label="Company" placeholder />
-        <MetaItem label="Product" placeholder />
+        <MetaItem
+          label="Company"
+          value={analysis ? (analysis.company ?? "—") : undefined}
+          placeholder={!analysis}
+        />
+        <MetaItem
+          label="Product"
+          value={analysis ? (analysis.product ?? "—") : undefined}
+          placeholder={!analysis}
+        />
       </dl>
 
       {/* Actions. */}
@@ -331,20 +398,29 @@ function MetaItem({
 /*  Right column — Cortexa analysis                                           */
 /* -------------------------------------------------------------------------- */
 
-/** Scalar attributes Cortexa will infer, shown as a two-column grid. */
-const ANALYSIS_FIELDS: { icon: IconType; label: string }[] = [
-  { icon: Building2, label: "Company" },
-  { icon: Package, label: "Product" },
-  { icon: Tag, label: "Category" },
-  { icon: Users, label: "Department" },
-  { icon: Gauge, label: "Sentiment" },
-  { icon: Heart, label: "Emotion" },
-  { icon: Flame, label: "Severity" },
-  { icon: Flag, label: "Priority" },
-  { icon: Languages, label: "Language" },
+/** Scalar attributes Cortexa infers, shown as a two-column grid. */
+const ANALYSIS_FIELDS: { icon: IconType; label: string; key: keyof ComplaintAIAnalysis }[] = [
+  { icon: Building2, label: "Company", key: "company" },
+  { icon: Package, label: "Product", key: "product" },
+  { icon: Tag, label: "Category", key: "category" },
+  { icon: Users, label: "Department", key: "department" },
+  { icon: Gauge, label: "Sentiment", key: "sentiment" },
+  { icon: Heart, label: "Emotion", key: "emotion" },
+  { icon: Flame, label: "Severity", key: "severity" },
+  { icon: Flag, label: "Priority", key: "priority" },
+  { icon: Languages, label: "Language", key: "language" },
 ];
 
-function CortexaAnalysisCard({ phase }: { phase: AnalysisPhase }) {
+function CortexaAnalysisCard({
+  phase,
+  analysis,
+}: {
+  phase: AnalysisPhase;
+  analysis: ComplaintAIAnalysis | null;
+}) {
+  const confidence =
+    analysis?.confidence_score != null ? Math.round(analysis.confidence_score * 100) : null;
+
   return (
     <motion.section
       variants={fadeUp}
@@ -373,61 +449,117 @@ function CortexaAnalysisCard({ phase }: { phase: AnalysisPhase }) {
         <StatusBadge phase={phase} />
       </div>
 
-      {/* Empty-state framing so the card never reads as broken. */}
+      {/* State banner — never an empty card. */}
       <div className="border-brand/15 bg-brand/[0.04] text-muted-foreground flex items-center gap-2.5 rounded-2xl border border-dashed px-4 py-3 text-sm">
         <Sparkles aria-hidden="true" className="text-brand size-4 shrink-0" />
-        <span>Cortexa is waiting for the first analysis of this complaint.</span>
+        <span>
+          {analysis
+            ? "Cortexa has finished analyzing this complaint."
+            : "Cortexa is analyzing this complaint..."}
+        </span>
       </div>
 
       {/* Scalar attributes. */}
       <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
         {ANALYSIS_FIELDS.map((field) => (
-          <AnalysisField key={field.label} icon={field.icon} label={field.label} />
+          <AnalysisField
+            key={field.label}
+            icon={field.icon}
+            label={field.label}
+            value={analysis ? ((analysis[field.key] as string | null) ?? "—") : null}
+          />
         ))}
       </div>
 
       {/* Entities. */}
       <div className="border-border/50 flex flex-col gap-2 border-t pt-5">
         <FieldLabel icon={Boxes} label="Entities" />
-        <div className="flex flex-wrap gap-2" aria-hidden="true">
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              className="border-border/60 bg-muted/40 h-6 rounded-full border"
-              style={{ width: `${5 + i * 1.5}rem` }}
-            />
-          ))}
-        </div>
-        <WaitingValue compact />
+        {analysis ? (
+          analysis.named_entities.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {analysis.named_entities.map((entity) => (
+                <span
+                  key={entity}
+                  className="border-brand/20 bg-brand/10 text-brand dark:bg-brand/15 inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium"
+                >
+                  {entity}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <span className="text-muted-foreground text-sm">No named entities detected.</span>
+          )
+        ) : (
+          <>
+            <div className="flex flex-wrap gap-2" aria-hidden="true">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="border-border/60 bg-muted/40 h-6 rounded-full border"
+                  style={{ width: `${5 + i * 1.5}rem` }}
+                />
+              ))}
+            </div>
+            <WaitingValue compact />
+          </>
+        )}
       </div>
 
       {/* Summary. */}
       <div className="border-border/50 flex flex-col gap-2.5 border-t pt-5">
         <FieldLabel icon={FileText} label="Executive Summary" />
-        <div className="flex flex-col gap-2" aria-hidden="true">
-          <span className="bg-muted/50 block h-3 w-full rounded-full" />
-          <span className="bg-muted/50 block h-3 w-[92%] rounded-full" />
-          <span className="bg-muted/50 block h-3 w-[70%] rounded-full" />
-        </div>
-        <WaitingValue />
+        {analysis ? (
+          <p className="text-foreground/90 text-sm leading-relaxed">
+            {analysis.summary ?? "No summary available."}
+          </p>
+        ) : (
+          <>
+            <div className="flex flex-col gap-2" aria-hidden="true">
+              <span className="bg-muted/50 block h-3 w-full rounded-full" />
+              <span className="bg-muted/50 block h-3 w-[92%] rounded-full" />
+              <span className="bg-muted/50 block h-3 w-[70%] rounded-full" />
+            </div>
+            <WaitingValue />
+          </>
+        )}
       </div>
 
       {/* Confidence meter. */}
       <div className="border-border/50 flex flex-col gap-2.5 border-t pt-5">
         <div className="flex items-center justify-between">
           <FieldLabel icon={BadgeCheck} label="Confidence" />
-          <span className="text-muted-foreground/70 text-xs italic">Pending</span>
+          <span
+            className={cn(
+              "text-xs tabular-nums",
+              confidence != null ? "text-brand font-semibold" : "text-muted-foreground/70 italic"
+            )}
+          >
+            {confidence != null ? `${confidence}%` : "Pending"}
+          </span>
         </div>
         <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full" aria-hidden="true">
-          <div className="from-brand/40 h-full w-0 rounded-full bg-gradient-to-r to-brand/20" />
+          <motion.div
+            className="from-brand h-full rounded-full bg-gradient-to-r to-[color-mix(in_oklch,var(--brand),white_25%)]"
+            initial={{ width: "0%" }}
+            animate={{ width: confidence != null ? `${confidence}%` : "0%" }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          />
         </div>
       </div>
     </motion.section>
   );
 }
 
-/** A single Cortexa attribute (icon chip + label + waiting placeholder). */
-function AnalysisField({ icon: Icon, label }: { icon: IconType; label: string }) {
+/** A single Cortexa attribute (icon chip + label + value or waiting placeholder). */
+function AnalysisField({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: IconType;
+  label: string;
+  value: string | null;
+}) {
   return (
     <div className="border-border/50 bg-card/40 flex items-center gap-3 rounded-2xl border p-3">
       <span className="border-brand/15 bg-brand/10 text-brand flex size-9 shrink-0 items-center justify-center rounded-xl border">
@@ -435,7 +567,11 @@ function AnalysisField({ icon: Icon, label }: { icon: IconType; label: string })
       </span>
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="text-muted-foreground text-xs font-medium">{label}</span>
-        <WaitingValue compact />
+        {value != null ? (
+          <span className="text-foreground truncate text-sm font-medium">{value}</span>
+        ) : (
+          <WaitingValue compact />
+        )}
       </div>
     </div>
   );
@@ -466,6 +602,537 @@ function WaitingValue({ compact = false }: { compact?: boolean }) {
       </span>
       Waiting for AI analysis…
     </span>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Decision intelligence (AI-002) — "so what should the business do next?"   */
+/* -------------------------------------------------------------------------- */
+
+/** Actionability level → meter fill (of 4) and tone. */
+const ACTIONABILITY_META: Record<string, { step: number; tone: "muted" | "brand" | "success" }> = {
+  Low: { step: 1, tone: "muted" },
+  Medium: { step: 2, tone: "brand" },
+  High: { step: 3, tone: "brand" },
+  "Very High": { step: 4, tone: "success" },
+};
+
+function DecisionIntelligenceSection({ decision }: { decision: DecisionIntelligence | null }) {
+  return (
+    <motion.section
+      variants={fadeUp}
+      aria-labelledby="decision-heading"
+      className="flex flex-col gap-5"
+    >
+      <div className="flex items-center gap-2.5">
+        <span className="border-brand/15 bg-brand/10 text-brand flex size-8 shrink-0 items-center justify-center rounded-xl border">
+          <Compass aria-hidden="true" className="size-4" />
+        </span>
+        <div className="flex flex-col">
+          <h2 id="decision-heading" className="font-heading text-lg font-semibold tracking-tight">
+            Decision Intelligence
+          </h2>
+          <p className="text-muted-foreground text-sm">So what should the business do next?</p>
+        </div>
+      </div>
+
+      {decision ? (
+        <div className="flex flex-col gap-6">
+          <ExecutiveSummaryCard summary={decision.executive_summary} />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <BusinessImpactCard impact={decision.business_impact} />
+            <RecommendedActionsCard actions={decision.recommended_actions} />
+          </div>
+          <div className="grid gap-6 lg:grid-cols-[1fr_1fr_1.5fr]">
+            <RecommendedDepartmentCard department={decision.recommended_department} />
+            <ActionabilityCard level={decision.actionability} />
+            <ReasoningCard reasoning={decision.reasoning} />
+          </div>
+        </div>
+      ) : (
+        <div className="border-brand/15 bg-brand/[0.04] text-muted-foreground flex items-center gap-2.5 rounded-2xl border border-dashed px-5 py-6 text-sm">
+          <Sparkles aria-hidden="true" className="text-brand size-4 shrink-0" />
+          <span>Cortexa is generating decision intelligence for this complaint...</span>
+        </div>
+      )}
+    </motion.section>
+  );
+}
+
+/** Shared glass surface + labelled header for the decision cards. */
+function DecisionCard({
+  icon: Icon,
+  title,
+  className,
+  children,
+}: {
+  icon: IconType;
+  title: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      className={cn(
+        "border-border/70 bg-card/70 flex flex-col gap-3 rounded-2xl border p-5 shadow-lg shadow-black/[0.03] backdrop-blur-xl dark:shadow-black/20",
+        className
+      )}
+    >
+      <FieldLabel icon={Icon} label={title} />
+      {children}
+    </motion.div>
+  );
+}
+
+function ExecutiveSummaryCard({ summary }: { summary: string | null }) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      className="relative overflow-hidden rounded-2xl border border-brand/20 bg-gradient-to-b from-card/80 to-brand/[0.04] p-6 shadow-lg shadow-brand/5 backdrop-blur-xl dark:from-card/70 dark:shadow-black/20"
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(26rem_14rem_at_0%_0%,color-mix(in_oklch,var(--brand)_10%,transparent),transparent_70%)]"
+      />
+      <FieldLabel icon={FileText} label="Executive Summary" />
+      <p className="text-foreground/90 mt-3 text-[0.95rem] leading-relaxed text-pretty">
+        {summary ?? "No executive summary available."}
+      </p>
+    </motion.div>
+  );
+}
+
+function BusinessImpactCard({ impact }: { impact: string[] }) {
+  return (
+    <DecisionCard icon={AlertTriangle} title="Business Impact">
+      {impact.length > 0 ? (
+        <ul className="flex flex-col gap-2.5">
+          {impact.map((item) => (
+            <li key={item} className="flex items-start gap-2.5 text-sm leading-relaxed">
+              <span className="bg-brand/50 mt-1.5 size-1.5 shrink-0 rounded-full" aria-hidden="true" />
+              <span className="text-foreground/90">{item}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-muted-foreground text-sm">No business impact assessed.</p>
+      )}
+    </DecisionCard>
+  );
+}
+
+function RecommendedActionsCard({ actions }: { actions: string[] }) {
+  return (
+    <DecisionCard icon={ClipboardList} title="Recommended Actions">
+      {actions.length > 0 ? (
+        <ol className="flex flex-col gap-2.5">
+          {actions.map((action, i) => (
+            <li key={action} className="flex items-start gap-3 text-sm leading-relaxed">
+              <span className="border-brand/20 bg-brand/10 text-brand mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border text-xs font-semibold tabular-nums">
+                {i + 1}
+              </span>
+              <span className="text-foreground/90">{action}</span>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="text-muted-foreground text-sm">No recommended actions.</p>
+      )}
+    </DecisionCard>
+  );
+}
+
+function RecommendedDepartmentCard({
+  department,
+}: {
+  department: DecisionIntelligence["recommended_department"];
+}) {
+  const rows: { label: string; value: string | null }[] = [
+    { label: "Primary", value: department?.primary ?? null },
+    { label: "Secondary", value: department?.secondary ?? null },
+    { label: "Optional", value: department?.optional ?? null },
+  ];
+  return (
+    <DecisionCard icon={Building} title="Recommended Department">
+      <ul className="flex flex-col gap-2.5">
+        {rows.map((row) => (
+          <li key={row.label} className="flex items-center justify-between gap-3">
+            <span className="text-muted-foreground text-xs font-medium">{row.label}</span>
+            {row.value ? (
+              <span
+                className={cn(
+                  "truncate text-sm font-medium",
+                  row.label === "Primary" ? "text-brand" : "text-foreground/90"
+                )}
+              >
+                {row.value}
+              </span>
+            ) : (
+              <span className="text-muted-foreground/60 text-sm">—</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </DecisionCard>
+  );
+}
+
+function ActionabilityCard({ level }: { level: string | null }) {
+  const meta = (level && ACTIONABILITY_META[level]) || ACTIONABILITY_META.Low;
+  const toneClass =
+    meta.tone === "success"
+      ? "border-success/25 bg-success/10 text-success"
+      : meta.tone === "brand"
+        ? "border-brand/20 bg-brand/10 text-brand"
+        : "border-border bg-muted text-muted-foreground";
+  const fillClass =
+    meta.tone === "success" ? "bg-success" : meta.tone === "brand" ? "bg-brand" : "bg-muted-foreground";
+
+  return (
+    <DecisionCard icon={Target} title="Actionability">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-muted-foreground text-xs">How immediately actionable</span>
+        <span
+          className={cn(
+            "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
+            toneClass
+          )}
+        >
+          {level ?? "Low"}
+        </span>
+      </div>
+      <div className="mt-1 flex gap-1.5" aria-hidden="true">
+        {[1, 2, 3, 4].map((segment) => (
+          <motion.span
+            key={segment}
+            initial={{ opacity: 0.4, scaleY: 0.6 }}
+            animate={{ opacity: 1, scaleY: 1 }}
+            transition={{ duration: 0.3, delay: 0.05 * segment }}
+            className={cn(
+              "h-1.5 flex-1 rounded-full",
+              segment <= meta.step ? fillClass : "bg-muted"
+            )}
+          />
+        ))}
+      </div>
+    </DecisionCard>
+  );
+}
+
+function ReasoningCard({ reasoning }: { reasoning: string | null }) {
+  return (
+    <DecisionCard icon={BrainCircuit} title="Decision Reasoning">
+      <p className="text-muted-foreground text-sm leading-relaxed text-pretty">
+        {reasoning ?? "No reasoning available."}
+      </p>
+    </DecisionCard>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Complaint intelligence (AI-003) — "has this happened before?"             */
+/* -------------------------------------------------------------------------- */
+
+/** Trend value → icon, tone and short narrative. */
+const TREND_META: Record<string, { icon: IconType; tone: Tone; caption: string }> = {
+  Increasing: { icon: TrendingUp, tone: "destructive", caption: "Complaint volume is rising." },
+  Stable: { icon: MoveRight, tone: "brand", caption: "Complaint volume is holding steady." },
+  Decreasing: { icon: TrendingDown, tone: "success", caption: "Complaint volume is easing." },
+  Unknown: { icon: HelpCircle, tone: "muted", caption: "Not enough history to detect a trend." },
+};
+
+/** Risk level → severity step (of 4) and tone. */
+const RISK_META: Record<string, { step: number; tone: Tone }> = {
+  Low: { step: 1, tone: "success" },
+  Medium: { step: 2, tone: "brand" },
+  High: { step: 3, tone: "destructive" },
+  Critical: { step: 4, tone: "destructive" },
+};
+
+type Tone = "muted" | "brand" | "success" | "destructive";
+
+const TONE_CHIP: Record<Tone, string> = {
+  muted: "border-border bg-muted text-muted-foreground",
+  brand: "border-brand/20 bg-brand/10 text-brand",
+  success: "border-success/25 bg-success/10 text-success",
+  destructive: "border-destructive/25 bg-destructive/10 text-destructive",
+};
+
+const TONE_FILL: Record<Tone, string> = {
+  muted: "bg-muted-foreground",
+  brand: "bg-brand",
+  success: "bg-success",
+  destructive: "bg-destructive",
+};
+
+const TONE_TEXT: Record<Tone, string> = {
+  muted: "text-muted-foreground",
+  brand: "text-brand",
+  success: "text-success",
+  destructive: "text-destructive",
+};
+
+function ComplaintIntelligenceSection({
+  intelligence,
+}: {
+  intelligence: ComplaintIntelligence | null;
+}) {
+  return (
+    <motion.section
+      variants={fadeUp}
+      aria-labelledby="intelligence-heading"
+      className="flex flex-col gap-5"
+    >
+      <div className="flex items-center gap-2.5">
+        <span className="border-brand/15 bg-brand/10 text-brand flex size-8 shrink-0 items-center justify-center rounded-xl border">
+          <History aria-hidden="true" className="size-4" />
+        </span>
+        <div className="flex flex-col">
+          <h2
+            id="intelligence-heading"
+            className="font-heading text-lg font-semibold tracking-tight"
+          >
+            Complaint Intelligence
+          </h2>
+          <p className="text-muted-foreground text-sm">Has this happened before?</p>
+        </div>
+      </div>
+
+      {intelligence ? (
+        <div className="flex flex-col gap-6">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <SimilarComplaintsCard
+              count={intelligence.similar_count}
+              confidence={intelligence.similarity_confidence}
+            />
+            <TrendCard trend={intelligence.trend} />
+            <RiskCard level={intelligence.risk_level} />
+          </div>
+          <ExecutiveInsightCard
+            pattern={intelligence.pattern}
+            insight={intelligence.executive_insight}
+          />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <BusinessRecommendationCard recommendations={intelligence.business_recommendation} />
+            <HealthScoreCard
+              score={intelligence.health_score}
+              reasons={intelligence.health_reasons}
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="border-brand/15 bg-brand/[0.04] text-muted-foreground flex items-center gap-2.5 rounded-2xl border border-dashed px-5 py-6 text-sm">
+          <Sparkles aria-hidden="true" className="text-brand size-4 shrink-0" />
+          <span>Cortexa is checking whether this has happened before...</span>
+        </div>
+      )}
+    </motion.section>
+  );
+}
+
+/** Similar-complaint count with a similarity-confidence meter beneath it. */
+function SimilarComplaintsCard({ count, confidence }: { count: number; confidence: number }) {
+  const clamped = Math.max(0, Math.min(100, confidence));
+  return (
+    <DecisionCard icon={Layers} title="Similar Complaints">
+      <div className="flex items-baseline gap-2">
+        <span className="font-heading text-brand text-4xl font-semibold tabular-nums">
+          {count}
+        </span>
+        <span className="text-muted-foreground text-sm">
+          {count === 1 ? "similar complaint found" : "similar complaints found"}
+        </span>
+      </div>
+      <div className="mt-1 flex flex-col gap-1.5">
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground text-xs">Similarity confidence</span>
+          <span
+            className={cn(
+              "text-xs font-semibold tabular-nums",
+              count > 0 ? "text-brand" : "text-muted-foreground/70"
+            )}
+          >
+            {clamped}%
+          </span>
+        </div>
+        <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full" aria-hidden="true">
+          <motion.div
+            className="from-brand h-full rounded-full bg-gradient-to-r to-[color-mix(in_oklch,var(--brand),white_25%)]"
+            initial={{ width: "0%" }}
+            animate={{ width: `${clamped}%` }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          />
+        </div>
+      </div>
+      <p className="text-muted-foreground text-xs leading-relaxed">
+        {count > 0
+          ? "Matched by company, product, category and failure mode."
+          : "No matching history — this appears to be a first occurrence."}
+      </p>
+    </DecisionCard>
+  );
+}
+
+function TrendCard({ trend }: { trend: string | null }) {
+  const meta = (trend && TREND_META[trend]) || TREND_META.Unknown;
+  const TrendIcon = meta.icon;
+  return (
+    <DecisionCard icon={Activity} title="Trend">
+      <div className="flex items-center gap-3">
+        <span
+          className={cn(
+            "flex size-11 shrink-0 items-center justify-center rounded-xl border",
+            TONE_CHIP[meta.tone]
+          )}
+        >
+          <TrendIcon aria-hidden="true" className="size-5" />
+        </span>
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="text-foreground text-lg font-semibold tracking-tight">
+            {trend ?? "Unknown"}
+          </span>
+          <span className="text-muted-foreground text-xs leading-relaxed">{meta.caption}</span>
+        </div>
+      </div>
+    </DecisionCard>
+  );
+}
+
+function RiskCard({ level }: { level: string | null }) {
+  const meta = (level && RISK_META[level]) || RISK_META.Low;
+  return (
+    <DecisionCard icon={ShieldAlert} title="Risk Level">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-muted-foreground text-xs">Business exposure</span>
+        <span
+          className={cn(
+            "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
+            TONE_CHIP[meta.tone]
+          )}
+        >
+          {level ?? "Low"}
+        </span>
+      </div>
+      <div className="mt-1 flex gap-1.5" aria-hidden="true">
+        {[1, 2, 3, 4].map((segment) => (
+          <motion.span
+            key={segment}
+            initial={{ opacity: 0.4, scaleY: 0.6 }}
+            animate={{ opacity: 1, scaleY: 1 }}
+            transition={{ duration: 0.3, delay: 0.05 * segment }}
+            className={cn(
+              "h-1.5 flex-1 rounded-full",
+              segment <= meta.step ? TONE_FILL[meta.tone] : "bg-muted"
+            )}
+          />
+        ))}
+      </div>
+      <p className="text-muted-foreground text-xs leading-relaxed">
+        Weighs frequency, severity, actionability and recurrence.
+      </p>
+    </DecisionCard>
+  );
+}
+
+/** Pattern + executive insight on the branded glass surface. */
+function ExecutiveInsightCard({
+  pattern,
+  insight,
+}: {
+  pattern: string | null;
+  insight: string | null;
+}) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      className="relative overflow-hidden rounded-2xl border border-brand/20 bg-gradient-to-b from-card/80 to-brand/[0.04] p-6 shadow-lg shadow-brand/5 backdrop-blur-xl dark:from-card/70 dark:shadow-black/20"
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(26rem_14rem_at_0%_0%,color-mix(in_oklch,var(--brand)_10%,transparent),transparent_70%)]"
+      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <FieldLabel icon={Lightbulb} label="Executive Insight" />
+        {pattern && (
+          <span className="border-brand/20 bg-brand/10 text-brand inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium">
+            <ScanSearch aria-hidden="true" className="size-3.5" />
+            {pattern}
+          </span>
+        )}
+      </div>
+      <p className="text-foreground/90 mt-3 text-[0.95rem] leading-relaxed text-pretty">
+        {insight ?? "No executive insight available."}
+      </p>
+    </motion.div>
+  );
+}
+
+function BusinessRecommendationCard({ recommendations }: { recommendations: string[] }) {
+  return (
+    <DecisionCard icon={Briefcase} title="Business Recommendation">
+      {recommendations.length > 0 ? (
+        <ol className="flex flex-col gap-2.5">
+          {recommendations.map((item, i) => (
+            <li key={item} className="flex items-start gap-3 text-sm leading-relaxed">
+              <span className="border-brand/20 bg-brand/10 text-brand mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border text-xs font-semibold tabular-nums">
+                {i + 1}
+              </span>
+              <span className="text-foreground/90">{item}</span>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="text-muted-foreground text-sm">No recommendation required.</p>
+      )}
+    </DecisionCard>
+  );
+}
+
+/** Relationship health score (0–100) with the factors that lowered it. */
+function HealthScoreCard({ score, reasons }: { score: number | null; reasons: string[] }) {
+  const clamped = score != null ? Math.max(0, Math.min(100, score)) : null;
+  const tone: Tone =
+    clamped == null ? "muted" : clamped >= 75 ? "success" : clamped >= 50 ? "brand" : "destructive";
+
+  return (
+    <DecisionCard icon={Heart} title="Relationship Health">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-muted-foreground text-xs">Customer relationship signal</span>
+        <span
+          className={cn(
+            "text-sm font-semibold tabular-nums",
+            clamped != null ? TONE_TEXT[tone] : "text-muted-foreground/70 italic"
+          )}
+        >
+          {clamped != null ? `${clamped}/100` : "Pending"}
+        </span>
+      </div>
+      <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full" aria-hidden="true">
+        <motion.div
+          className={cn("h-full rounded-full", TONE_FILL[tone])}
+          initial={{ width: "0%" }}
+          animate={{ width: clamped != null ? `${clamped}%` : "0%" }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        />
+      </div>
+      {reasons.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {reasons.map((reason) => (
+            <span
+              key={reason}
+              className="border-border/60 bg-muted/50 text-muted-foreground inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium"
+            >
+              {reason}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-muted-foreground text-xs leading-relaxed">
+          No negative signals detected.
+        </p>
+      )}
+    </DecisionCard>
   );
 }
 
@@ -600,24 +1267,14 @@ const FUTURE_INSIGHTS: { icon: IconType; title: string; description: string }[] 
     description: "Trace the underlying issue behind this complaint.",
   },
   {
-    icon: Layers,
-    title: "Similar Complaints",
-    description: "See patterns across related reports.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Business Impact",
-    description: "Estimate the cost and risk of inaction.",
+    icon: Users,
+    title: "Customer Journey",
+    description: "Follow this customer's history across every touchpoint.",
   },
   {
     icon: LineChart,
     title: "Predictions",
     description: "Forecast escalation and resolution likelihood.",
-  },
-  {
-    icon: Lightbulb,
-    title: "Recommendations",
-    description: "Get concrete next steps toward resolution.",
   },
 ];
 
@@ -769,18 +1426,6 @@ function CenteredState({
 /* -------------------------------------------------------------------------- */
 
 type IconType = React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" }>;
-
-/** Derive the (future) analysis phase from the stored status string. */
-function analysisPhase(status: string): AnalysisPhase {
-  const s = status.toLowerCase();
-  if (s.includes("resolve") || s.includes("close") || s.includes("complete") || s.includes("done")) {
-    return "completed";
-  }
-  if (s.includes("progress") || s.includes("review") || s.includes("analyz")) {
-    return "analyzing";
-  }
-  return "pending";
-}
 
 /** Locale date like "Jul 14, 2026". Falls back to the raw string if unparseable. */
 function formatDate(iso: string): string {

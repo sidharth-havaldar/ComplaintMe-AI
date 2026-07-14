@@ -11,7 +11,7 @@ defined only between the tables created here.
 
 import uuid
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, Uuid, func
+from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String, Text, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -79,6 +79,13 @@ class ComplaintAIAnalysis(Base):
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     language: Mapped[str | None] = mapped_column(String(50), nullable=True)
     confidence_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # AI-002 decision intelligence — additive JSON payload (executive summary,
+    # business impact, recommended department/actions, actionability, reasoning).
+    # Nullable so pre-AI-002 rows and future providers remain fully compatible.
+    decision_intelligence: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # AI-003 cross-complaint intelligence — additive JSON payload (similar count,
+    # trend, pattern, risk, executive insight, recommendation, health score).
+    complaint_intelligence: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     processing_time: Mapped[int | None] = mapped_column(Integer, nullable=True)
     prompt_version: Mapped[str | None] = mapped_column(String(50), nullable=True)
     created_at: Mapped[DateTime] = mapped_column(

@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     LOG_JSON: bool = False
 
+    # Cortexa understanding engine — selects the AI provider (see app.ai.factory).
+    # Swappable without code changes; "heuristic" is the dependency-free V1 engine.
+    CORTEXA_PROVIDER: str = "heuristic"
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def database_url(self) -> str:

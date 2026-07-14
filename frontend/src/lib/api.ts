@@ -18,6 +18,63 @@ export type Complaint = {
   current_status: string;
   created_at: string;
   updated_at: string;
+  /** Present only on the detail endpoint (GET /complaints/{id}); null while Cortexa is analyzing. */
+  ai_analysis?: ComplaintAIAnalysis | null;
+};
+
+/** Cortexa's structured analysis of a complaint (AI-001). */
+export type ComplaintAIAnalysis = {
+  id: string;
+  ai_provider: string;
+  ai_model: string;
+  category: string | null;
+  company: string | null;
+  product: string | null;
+  department: string | null;
+  location: string | null;
+  sentiment: string | null;
+  emotion: string | null;
+  severity: string | null;
+  priority: string | null;
+  summary: string | null;
+  language: string | null;
+  confidence_score: number | null;
+  named_entities: string[];
+  /** Decision-support intelligence (AI-002); null for pre-AI-002 analyses. */
+  decision_intelligence: DecisionIntelligence | null;
+  /** Cross-complaint intelligence (AI-003); null for pre-AI-003 analyses. */
+  complaint_intelligence: ComplaintIntelligence | null;
+  created_at: string;
+};
+
+/** Recommended ownership: primary owner plus supporting teams (AI-002). */
+export type DepartmentRecommendation = {
+  primary: string | null;
+  secondary: string | null;
+  optional: string | null;
+};
+
+/** Cortexa's "so what should the business do next" layer (AI-002). */
+export type DecisionIntelligence = {
+  executive_summary: string | null;
+  business_impact: string[];
+  recommended_department: DepartmentRecommendation | null;
+  recommended_actions: string[];
+  actionability: string | null;
+  reasoning: string | null;
+};
+
+/** Cortexa's cross-complaint intelligence — "has this happened before?" (AI-003). */
+export type ComplaintIntelligence = {
+  similar_count: number;
+  similarity_confidence: number;
+  trend: string | null;
+  pattern: string | null;
+  risk_level: string | null;
+  executive_insight: string | null;
+  business_recommendation: string[];
+  health_score: number | null;
+  health_reasons: string[];
 };
 
 async function buildHeaders(): Promise<Record<string, string>> {

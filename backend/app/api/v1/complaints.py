@@ -6,10 +6,17 @@ authenticated user's id is resolved via the ``CurrentUserId`` dependency.
 
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 
 from app.api.deps import ComplaintServiceDep, CurrentUserId
-from app.schemas.complaint import ComplaintCreate, ComplaintResponse, ComplaintUpdate
+from app.schemas.complaint import (
+    AIAnalysisResponse,
+    ComplaintCreate,
+    ComplaintDetailResponse,
+    ComplaintResponse,
+    ComplaintUpdate,
+)
+from app.services.cortexa import analyze_complaint_task
 
 router = APIRouter(prefix="/complaints", tags=["complaints"])
 
@@ -19,9 +26,14 @@ async def create_complaint(
     payload: ComplaintCreate,
     service: ComplaintServiceDep,
     user_id: CurrentUserId,
+    background_tasks: BackgroundTasks,
 ) -> ComplaintResponse:
-    """Create a complaint for the authenticated user."""
+    """Create a complaint, then kick off Cortexa analysis in the background."""
     complaint = await service.create(user_id=user_id, payload=payload)
+    # Decoupled from the response: Cortexa runs after the client is answered, so
+    # the API never blocks on analysis. The detail page shows an "analyzing"
+    # state until the result lands.
+    background_tasks.add_task(analyze_complaint_task, complaint.id)
     return ComplaintResponse.model_validate(complaint)
 
 
@@ -32,16 +44,20 @@ async def list_complaints(service: ComplaintServiceDep) -> list[ComplaintRespons
     return [ComplaintResponse.model_validate(c) for c in complaints]
 
 
-@router.get("/{complaint_id}", response_model=ComplaintResponse)
+@router.get("/{complaint_id}", response_model=ComplaintDetailResponse)
 async def get_complaint(
     complaint_id: uuid.UUID,
     service: ComplaintServiceDep,
-) -> ComplaintResponse:
-    """Retrieve a single non-deleted complaint by id."""
-    complaint = await service.get(complaint_id)
-    if complaint is None:
+) -> ComplaintDetailResponse:
+    """Retrieve a complaint with its latest Cortexa analysis (null while analyzing)."""
+    result = await service.get_with_latest_analysis(complaint_id)
+    if result is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint not found")
-    return ComplaintResponse.model_validate(complaint)
+    complaint, analysis = result
+    response = ComplaintDetailResponse.model_validate(complaint)
+    if analysis is not None:
+        response.ai_analysis = AIAnalysisResponse.model_validate(analysis)
+    return response
 
 
 @router.patch("/{complaint_id}", response_model=ComplaintResponse)
