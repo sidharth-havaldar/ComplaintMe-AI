@@ -48,3 +48,21 @@ export async function createComplaint(description: string): Promise<Complaint> {
 
   return (await response.json()) as Complaint;
 }
+
+/**
+ * List the current user's complaints, newest first, for the dashboard's
+ * "Recent Complaints" surface. Read-only; calls the existing GET /complaints
+ * endpoint — no backend or API changes are introduced here.
+ */
+export async function listComplaints(): Promise<Complaint[]> {
+  const response = await fetch(`${API_BASE_URL}/complaints`, {
+    method: "GET",
+    headers: await buildHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to load complaints (status ${response.status}).`);
+  }
+
+  return (await response.json()) as Complaint[];
+}

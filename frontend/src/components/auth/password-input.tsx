@@ -29,7 +29,7 @@ export function PasswordInput({ className, disabled, ...props }: PasswordInputPr
         disabled={disabled}
         aria-label={visible ? "Hide password" : "Show password"}
         aria-pressed={visible}
-        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute inset-y-0 right-0 flex items-center rounded-r-md px-3 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
+        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 absolute inset-y-0 right-0 flex items-center rounded-r-lg px-3 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
       >
         {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
       </button>

@@ -17,14 +17,36 @@ export const metadata: Metadata = {
   description: "Tell us what happened. We'll understand the rest.",
 };
 
+/**
+ * Sets the initial color scheme from the OS preference before first paint so
+ * there is no flash of the wrong theme. Presentation-only: no persisted state,
+ * no behavioral change.
+ */
+const themeScript = `
+(function () {
+  try {
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      document.documentElement.classList.add("dark");
+    }
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable}`}
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

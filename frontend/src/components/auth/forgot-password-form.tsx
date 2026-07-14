@@ -97,7 +97,7 @@ export function ForgotPasswordForm() {
         )}
       </div>
 
-      <Button type="submit" disabled={isLoading} className="w-full">
+      <Button type="submit" variant="brand" size="lg" disabled={isLoading} className="w-full">
         {isLoading ? (
           <>
             <Loader2 aria-hidden="true" className="size-4 animate-spin" />

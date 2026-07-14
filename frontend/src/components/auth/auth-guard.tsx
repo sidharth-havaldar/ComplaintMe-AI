@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
+import { LogoMark } from "@/components/logo";
 import { getSupabaseClient } from "@/lib/supabase";
 
 /**
@@ -25,9 +26,12 @@ function AuthLoading() {
     <div
       role="status"
       aria-live="polite"
-      className="flex min-h-svh items-center justify-center p-6"
+      className="bg-ambient flex min-h-svh flex-col items-center justify-center gap-5 p-6"
     >
-      <Loader2 aria-hidden="true" className="text-muted-foreground size-6 animate-spin" />
+      <div className="relative">
+        <LogoMark className="animate-pulse" />
+      </div>
+      <Loader2 aria-hidden="true" className="text-muted-foreground size-5 animate-spin" />
       <span className="sr-only">Checking your session…</span>
     </div>
   );
