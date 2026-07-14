@@ -1,0 +1,50 @@
+import { getSupabaseClient } from "@/lib/supabase";
+
+/**
+ * Thin client for the ComplaintMe AI backend REST API.
+ *
+ * The base URL comes from NEXT_PUBLIC_API_URL (see frontend/.env.example) and
+ * falls back to the local backend so development works out of the box. Requests
+ * carry the current Supabase access token as a Bearer credential, reusing the
+ * shared browser client rather than duplicating authentication logic.
+ */
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+
+export type Complaint = {
+  id: string;
+  title: string | null;
+  description: string;
+  current_status: string;
+  created_at: string;
+  updated_at: string;
+};
+
+async function buildHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+
+  const {
+    data: { session },
+  } = await getSupabaseClient().auth.getSession();
+
+  if (session?.access_token) {
+    headers.Authorization = `Bearer ${session.access_token}`;
+  }
+
+  return headers;
+}
+
+/** Create a complaint from a free-text description and return the saved record. */
+export async function createComplaint(description: string): Promise<Complaint> {
+  const response = await fetch(`${API_BASE_URL}/complaints`, {
+    method: "POST",
+    headers: await buildHeaders(),
+    body: JSON.stringify({ description }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to create complaint (status ${response.status}).`);
+  }
+
+  return (await response.json()) as Complaint;
+}

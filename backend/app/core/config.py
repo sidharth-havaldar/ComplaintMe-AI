@@ -24,8 +24,10 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     API_V1_PREFIX: str = "/api/v1"
 
-    # CORS — comma-separated list of allowed origins
-    CORS_ORIGINS: str = "http://localhost:3000"
+    # CORS — comma-separated list of allowed origins. Both localhost:3000 and
+    # :3001 are allowed by default because Next.js falls back to :3001 when
+    # :3000 is already in use. Override via the CORS_ORIGINS env var.
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001"
 
     # Supabase (verification implemented in AUTH-002)
     SUPABASE_URL: str = ""
