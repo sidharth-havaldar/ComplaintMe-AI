@@ -107,7 +107,7 @@ export function RecentComplaints() {
           variants={staggerContainer}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
         >
           <AnimatePresence>
             {complaints.map((complaint) => (
@@ -180,7 +180,7 @@ function EmptyState() {
 
 function RecentSkeletons() {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2" aria-hidden="true">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-hidden="true">
       {[0, 1].map((i) => (
         <div
           key={i}

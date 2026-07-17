@@ -1,42 +1,28 @@
 "use client";
 
-import * as React from "react";
 import { MotionConfig, motion } from "framer-motion";
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { ComplaintForm } from "@/components/complaints/complaint-form";
+import { CopilotGuidance } from "@/components/dashboard/copilot-guidance";
 import { fadeUp, staggerContainer } from "@/components/dashboard/motion";
 import { RecentComplaints } from "@/components/dashboard/recent-complaints";
-import { SidebarCards } from "@/components/dashboard/sidebar-cards";
 import { Wordmark } from "@/components/logo";
 
-/** Time-of-day greeting. Computed on the client to match the user's timezone. */
-function greetingForHour(hour: number): string {
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
-
 /**
- * The premium AI workspace (UI-002). Replaces the single centered complaint
- * form with a full dashboard: a time-aware greeting, the glass composer as the
- * hero, an informative right rail, and recent complaints below.
+ * The Consumer Copilot entry experience (COP-001). One clear invitation —
+ * "Tell us what happened." — over a full-width composer, followed by guidance
+ * on what to include and which evidence helps, then the user's recent
+ * complaints.
  *
  * This component is presentation + composition only. All complaint submission
  * behavior still lives in <ComplaintForm/> and is unchanged.
  */
 export function DashboardWorkspace() {
-  // Greeting depends on the local clock, so resolve it after mount to avoid a
-  // server/client hydration mismatch.
-  const [greeting, setGreeting] = React.useState<string | null>(null);
-  React.useEffect(() => {
-    setGreeting(greetingForHour(new Date().getHours()));
-  }, []);
-
   return (
     <MotionConfig reducedMotion="user">
       <main className="bg-background bg-ambient relative min-h-svh">
-        <div className="mx-auto flex w-full max-w-6xl flex-col px-5 pb-24 sm:px-8">
+        <div className="flex w-full flex-col px-5 pb-24 sm:px-8 lg:px-14 xl:px-20">
           {/* Top bar: brand + sign out. */}
           <header className="flex items-center justify-between py-5">
             <Wordmark />
@@ -49,33 +35,25 @@ export function DashboardWorkspace() {
             animate="show"
             className="flex flex-col gap-10"
           >
-            {/* Greeting + hero question. */}
-            <motion.section variants={fadeUp} className="flex flex-col gap-3 pt-6 sm:pt-10">
-              <p className="text-muted-foreground text-sm font-medium">
-                <span className="text-brand">{greeting ?? "Welcome back"}</span>
-                {greeting && " · Welcome back."}
-              </p>
-              <h1 className="font-heading text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
-                What happened today?
+            {/* Copilot invitation. */}
+            <motion.section
+              variants={fadeUp}
+              className="flex flex-col items-center gap-4 pt-10 text-center sm:pt-16"
+            >
+              <h1 className="font-heading text-4xl font-semibold tracking-tight text-balance sm:text-5xl md:text-6xl">
+                Tell us what happened.
               </h1>
-              <p className="text-muted-foreground max-w-xl text-base leading-relaxed sm:text-lg">
-                Describe your issue naturally. Cortexa will understand everything else.
+              <p className="text-muted-foreground max-w-2xl text-base leading-relaxed text-balance sm:text-lg">
+                Don&apos;t worry about writing a formal complaint. Describe your situation
+                naturally — we&apos;ll create a professional complaint for you.
               </p>
             </motion.section>
 
-            {/* Composer (hero) + right rail. */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)] lg:gap-8">
-              <div className="min-w-0">
-                <ComplaintForm />
-              </div>
-              <motion.aside
-                variants={staggerContainer}
-                aria-label="How Cortexa works"
-                className="min-w-0"
-              >
-                <SidebarCards />
-              </motion.aside>
-            </div>
+            {/* Full-width composer. */}
+            <ComplaintForm />
+
+            {/* Helpful tips + evidence guidance. */}
+            <CopilotGuidance />
 
             {/* Recent complaints. */}
             <motion.div variants={fadeUp}>

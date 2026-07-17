@@ -1,0 +1,1601 @@
+{
+  "meta": {
+    "name": "cortexa-evaluation-v1",
+    "version": "1.0",
+    "created": "2026-07-17",
+    "count": 100,
+    "industries": {
+      "Electronics": 10,
+      "Banking": 9,
+      "Insurance": 9,
+      "Healthcare": 9,
+      "Hotels": 9,
+      "Airlines": 9,
+      "Telecom": 9,
+      "Retail": 9,
+      "Food Delivery": 9,
+      "Government": 9,
+      "Education": 9
+    },
+    "difficulty": {
+      "easy": 34,
+      "medium": 31,
+      "hard": 22,
+      "ambiguous": 13
+    }
+  },
+  "labels": {
+    "categories": {
+      "Product Failure": "Customer Support",
+      "Warranty Claim": "Warranty & Repairs",
+      "Delivery Issue": "Logistics",
+      "Billing Issue": "Billing & Payments",
+      "Service Quality": "Customer Experience",
+      "Account Issue": "Technical Support",
+      "Booking & Reservation": "Reservations",
+      "Baggage Issue": "Baggage Services",
+      "Claim Dispute": "Claims",
+      "Fraud & Security": "Fraud & Security",
+      "Safety Concern": "Safety & Compliance",
+      "Data Privacy": "Privacy Office",
+      "General Complaint": "Customer Support"
+    },
+    "sentiment": ["Negative", "Neutral", "Positive"],
+    "severity": ["Low", "Medium", "High"],
+    "priority": ["Low", "Medium", "High"]
+  },
+  "complaints": [
+    {
+      "id": "eval-001",
+      "industry": "Electronics",
+      "difficulty": "easy",
+      "complaint": "My Samsung Galaxy S23 stopped working yesterday. The screen is completely black and it won't turn on even after charging overnight. I bought it eight months ago and it is still under warranty.",
+      "expected": {
+        "company": "Samsung",
+        "product": "Samsung Galaxy S23",
+        "category": "Product Failure",
+        "department": "Customer Support",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-002",
+      "industry": "Electronics",
+      "difficulty": "easy",
+      "complaint": "The charger that came with my OnePlus 12 sparked and caught fire while plugged in last night. There are burn marks on my wall socket. This is extremely dangerous and I want it investigated immediately.",
+      "expected": {
+        "company": "OnePlus",
+        "product": "OnePlus 12",
+        "category": "Safety Concern",
+        "department": "Safety & Compliance",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      }
+    },
+    {
+      "id": "eval-003",
+      "industry": "Electronics",
+      "difficulty": "easy",
+      "complaint": "Dell is refusing to honor the warranty on my XPS 15 laptop. The keyboard failed within six months, but the service center claims it is physical damage and wants to charge me for the repair. I have taken excellent care of this machine.",
+      "expected": {
+        "company": "Dell",
+        "product": "Dell XPS 15",
+        "category": "Warranty Claim",
+        "department": "Warranty & Repairs",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-004",
+      "industry": "Electronics",
+      "difficulty": "easy",
+      "complaint": "I bought Sony WH-1000XM5 headphones two weeks ago and the right earcup produces no sound at all. Clearly a defective unit. I want a refund, not a replacement.",
+      "expected": {
+        "company": "Sony",
+        "product": "Sony WH-1000XM5",
+        "category": "Product Failure",
+        "department": "Customer Support",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-005",
+      "industry": "Electronics",
+      "difficulty": "medium",
+      "complaint": "Ever since the last software update, the screen on my Pixel 8 flickers whenever the brightness drops below halfway. It's subtle but constant, and it gives me headaches when reading at night.",
+      "expected": {
+        "company": "Google",
+        "product": "Google Pixel 8",
+        "category": "Product Failure",
+        "department": "Customer Support",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "Company is implicit — 'Pixel' must be resolved to Google."
+    },
+    {
+      "id": "eval-006",
+      "industry": "Electronics",
+      "difficulty": "medium",
+      "complaint": "Apple has billed me twice for the same iCloud+ subscription for three months running. Each month I raise a ticket, each month someone promises a reversal, and each month two charges appear on my card again.",
+      "expected": {
+        "company": "Apple",
+        "product": "iCloud+",
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-007",
+      "industry": "Electronics",
+      "difficulty": "medium",
+      "complaint": "I ordered a Lenovo ThinkPad on the 2nd of June with a promised delivery of five business days. It is now the 24th and the tracking page still says 'preparing to dispatch'. Nobody at support can tell me where my laptop actually is.",
+      "expected": {
+        "company": "Lenovo",
+        "product": "Lenovo ThinkPad",
+        "category": "Delivery Issue",
+        "department": "Logistics",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-008",
+      "industry": "Electronics",
+      "difficulty": "hard",
+      "complaint": "Fantastic job, Xiaomi. Truly world-class engineering — my brand new Redmi Note 13 restarts itself every time I open the camera. Really adds excitement to photography, never knowing if the phone will survive the shot. Ten out of ten experience.",
+      "expected": {
+        "company": "Xiaomi",
+        "product": "Redmi Note 13",
+        "category": "Product Failure",
+        "department": "Customer Support",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "Sarcasm: surface language is positive ('fantastic', 'world-class', 'ten out of ten') but the sentiment is clearly negative."
+    },
+    {
+      "id": "eval-009",
+      "industry": "Electronics",
+      "difficulty": "hard",
+      "complaint": "Where do I even start with this LG TV. The delivery van showed up nine days late, the installers scratched my doorframe, and when we finally unboxed it the panel had a crack running from corner to corner. I've been passed between the store, the courier, and LG for two weeks and everyone says it's someone else's responsibility.",
+      "expected": {
+        "company": "LG",
+        "product": "LG TV",
+        "category": "Product Failure",
+        "department": "Customer Support",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Multiple intertwined issues (late delivery, property damage, cracked panel). The cracked panel is the primary issue; Delivery Issue is an acceptable alternate."
+    },
+    {
+      "id": "eval-010",
+      "industry": "Electronics",
+      "difficulty": "ambiguous",
+      "complaint": "Not sure whether it's worth complaining about — my tablet's battery has started draining much faster lately, but then again it is over three years old. Do batteries just die like that or could an update have caused it?",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "General Complaint",
+        "department": "Customer Support",
+        "sentiment": "Neutral",
+        "severity": "Low",
+        "priority": "Low"
+      },
+      "notes": "No company or product identifiable; more of a question than a complaint. Product Failure is an acceptable alternate category."
+    },
+    {
+      "id": "eval-011",
+      "industry": "Banking",
+      "difficulty": "easy",
+      "complaint": "There is an unauthorized transaction of ₹48,500 on my HDFC Bank account from this morning. I did not make this payment and I still have my card with me. Please block my card and reverse this fraud immediately.",
+      "expected": {
+        "company": "HDFC Bank",
+        "product": null,
+        "category": "Fraud & Security",
+        "department": "Fraud & Security",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      }
+    },
+    {
+      "id": "eval-012",
+      "industry": "Banking",
+      "difficulty": "easy",
+      "complaint": "The staff at the SBI branch on MG Road were incredibly rude to my elderly father when he went to update his passbook. He was made to wait two hours and then dismissed without help. Unacceptable behaviour from a public bank.",
+      "expected": {
+        "company": "SBI",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-013",
+      "industry": "Banking",
+      "difficulty": "easy",
+      "complaint": "Chase charged me a $35 overdraft fee twice for the same transaction on June 3rd. One fee I can dispute, but two identical fees on the same day for the same purchase is clearly a system error. I want both reversed.",
+      "expected": {
+        "company": "Chase",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-014",
+      "industry": "Banking",
+      "difficulty": "medium",
+      "complaint": "I've been locked out of my ICICI netbanking for a week now. The OTP never arrives on my registered number even though I receive texts from everyone else. Without access I can't pay my rent or my credit card bill, which is due in three days.",
+      "expected": {
+        "company": "ICICI",
+        "product": null,
+        "category": "Account Issue",
+        "department": "Technical Support",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "High"
+      },
+      "notes": "Priority is elevated by the imminent payment deadline even though severity is moderate."
+    },
+    {
+      "id": "eval-015",
+      "industry": "Banking",
+      "difficulty": "medium",
+      "complaint": "A failed money transfer on Paytm debited my account on the 28th of May but the beneficiary never received it. The app said the refund would take 5–7 business days. It has now been three weeks and the money has simply vanished into thin air.",
+      "expected": {
+        "company": "Paytm",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-016",
+      "industry": "Banking",
+      "difficulty": "medium",
+      "complaint": "My Bank of America credit card statement shows interest charged even though I paid the full balance before the due date — I have the payment confirmation. This is the second cycle in a row. Either your system is misapplying my payments or the due date shown in the app is wrong.",
+      "expected": {
+        "company": "Bank of America",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-017",
+      "industry": "Banking",
+      "difficulty": "hard",
+      "complaint": "Congratulations to Axis Bank on their innovative new service where someone else takes a personal loan in your name. I discovered a ₹2 lakh loan on my credit report that I never applied for, opened through an Axis branch I have never visited. The branch says everything is 'in order'. In order for whom, exactly?",
+      "expected": {
+        "company": "Axis Bank",
+        "product": null,
+        "category": "Fraud & Security",
+        "department": "Fraud & Security",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Identity theft narrated with sarcasm — 'congratulations' and 'innovative' must not read as positive sentiment."
+    },
+    {
+      "id": "eval-018",
+      "industry": "Banking",
+      "difficulty": "hard",
+      "complaint": "I've banked with Wells Fargo for eleven years and mostly it's been fine, honestly. The mobile app is great. But the mortgage team has now missed four scheduled callbacks about my refinance, and last month I noticed I was charged a processing fee twice. I hate writing complaints but this is becoming hard to ignore.",
+      "expected": {
+        "company": "Wells Fargo",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "Buried complaint in a mostly-warm narrative; positive framing ('fine', 'great') must not outweigh the duplicate fee. Service Quality is an acceptable alternate category."
+    },
+    {
+      "id": "eval-019",
+      "industry": "Banking",
+      "difficulty": "ambiguous",
+      "complaint": "Is it normal for a bank to take five business days to reverse a failed UPI transaction? Mine failed on Monday and support says to just wait. Not angry, just wondering if I should escalate.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Neutral",
+        "severity": "Low",
+        "priority": "Low"
+      },
+      "notes": "Question phrasing, no named bank, explicitly 'not angry'. General Complaint is an acceptable alternate."
+    },
+    {
+      "id": "eval-020",
+      "industry": "Insurance",
+      "difficulty": "easy",
+      "complaint": "ICICI Lombard rejected my car insurance claim for the accident on May 14th, saying the damage was 'pre-existing'. The car was inspected and photographed by their own surveyor two months before the accident with zero damage noted. I want this claim reassessed.",
+      "expected": {
+        "company": "ICICI Lombard",
+        "product": null,
+        "category": "Claim Dispute",
+        "department": "Claims",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      }
+    },
+    {
+      "id": "eval-021",
+      "industry": "Insurance",
+      "difficulty": "easy",
+      "complaint": "LIC has debited my premium twice this month — once through the auto-pay mandate and once through the manual payment I made before the mandate kicked in. Please refund the duplicate premium of ₹23,400.",
+      "expected": {
+        "company": "LIC",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-022",
+      "industry": "Insurance",
+      "difficulty": "easy",
+      "complaint": "Your agent sold me a Max Life policy claiming the premium was payable for only five years. The policy document that arrived says fifteen years. When I called to complain, the agent stopped answering my calls entirely. This is blatant mis-selling.",
+      "expected": {
+        "company": "Max Life",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Mis-selling; Fraud & Security is an acceptable alternate category."
+    },
+    {
+      "id": "eval-023",
+      "industry": "Insurance",
+      "difficulty": "medium",
+      "complaint": "My father was admitted for emergency cardiac surgery last night and Star Health denied the cashless authorization at the hospital, citing 'document verification pending'. We had to arrange ₹3 lakh at midnight. Every document was submitted at policy purchase two years ago.",
+      "expected": {
+        "company": "Star Health",
+        "product": null,
+        "category": "Claim Dispute",
+        "department": "Claims",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      }
+    },
+    {
+      "id": "eval-024",
+      "industry": "Insurance",
+      "difficulty": "medium",
+      "complaint": "I purchased a term policy from HDFC Ergo six weeks ago and have still not received the physical policy documents, despite the welcome email promising them within ten days. Two follow-ups later, all I get is 'it has been dispatched'.",
+      "expected": {
+        "company": "HDFC Ergo",
+        "product": null,
+        "category": "Delivery Issue",
+        "department": "Logistics",
+        "sentiment": "Negative",
+        "severity": "Low",
+        "priority": "Low"
+      }
+    },
+    {
+      "id": "eval-025",
+      "industry": "Insurance",
+      "difficulty": "hard",
+      "complaint": "Truly impressive turnaround from Bajaj Allianz — only 94 days to process a claim they advertise as 'settled in 7 days'. At this velocity my next claim should be resolved sometime around my retirement. The claim, by the way, is still not paid.",
+      "expected": {
+        "company": "Bajaj Allianz",
+        "product": null,
+        "category": "Claim Dispute",
+        "department": "Claims",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Sarcasm: 'impressive' and 'velocity' are mock praise for a 94-day unpaid claim."
+    },
+    {
+      "id": "eval-026",
+      "industry": "Insurance",
+      "difficulty": "hard",
+      "complaint": "My travel policy with Tata AIG auto-renewed and charged my card even though I never opted into auto-renewal — I specifically remember unchecking that box. Support insists I consented but cannot produce any record of it. Meanwhile the 'cancel renewal' page in the app just loops back to the home screen.",
+      "expected": {
+        "company": "Tata AIG",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "Mixed billing + technical + consent dispute. Fraud & Security and Account Issue are acceptable alternates."
+    },
+    {
+      "id": "eval-027",
+      "industry": "Insurance",
+      "difficulty": "ambiguous",
+      "complaint": "Quick question — does travel insurance normally cover a train that got cancelled due to weather? Mine was cancelled last weekend and I'm trying to figure out whether filing a claim is even worth the paperwork.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "General Complaint",
+        "department": "Customer Support",
+        "sentiment": "Neutral",
+        "severity": "Low",
+        "priority": "Low"
+      },
+      "notes": "Pure question, not a grievance. Claim Dispute is an acceptable alternate if graded as a pre-claim inquiry."
+    },
+    {
+      "id": "eval-028",
+      "industry": "Insurance",
+      "difficulty": "ambiguous",
+      "complaint": "To be fair, New India Assurance did eventually pay my flood damage claim in full. It just took four months, three re-submissions of the same documents, and a visit to their regional office. Satisfied with the outcome, exhausted by the process.",
+      "expected": {
+        "company": "New India Assurance",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Neutral",
+        "severity": "Low",
+        "priority": "Low"
+      },
+      "notes": "Mixed review — positive outcome, painful process. Negative sentiment and Claim Dispute are acceptable alternates."
+    },
+    {
+      "id": "eval-029",
+      "industry": "Healthcare",
+      "difficulty": "easy",
+      "complaint": "Apollo Hospital billed me ₹18,000 for a 'deluxe room' when I was in a shared ward the entire three days of my stay. I have photos and the ward register entry. Please correct the bill and refund the difference.",
+      "expected": {
+        "company": "Apollo Hospital",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-030",
+      "industry": "Healthcare",
+      "difficulty": "easy",
+      "complaint": "The receptionist at Fortis Clinic was dismissive and rude when I asked why my 10am appointment was running 90 minutes late. She rolled her eyes and told me to 'sit down or reschedule'. Patients deserve basic courtesy.",
+      "expected": {
+        "company": "Fortis Clinic",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-031",
+      "industry": "Healthcare",
+      "difficulty": "easy",
+      "complaint": "The MedPlus pharmacy on Brigade Road dispensed the wrong medication — I was given a blood pressure drug instead of the prescribed thyroid medication. The names look similar but this could have seriously harmed me. This needs to be reported and investigated.",
+      "expected": {
+        "company": "MedPlus",
+        "product": null,
+        "category": "Safety Concern",
+        "department": "Safety & Compliance",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      }
+    },
+    {
+      "id": "eval-032",
+      "industry": "Healthcare",
+      "difficulty": "medium",
+      "complaint": "I cannot log into the Practo patient portal to download my lab reports. Password reset emails never arrive, and the support chatbot keeps sending me back to the same broken reset page. My doctor's appointment is on Friday and she needs those reports.",
+      "expected": {
+        "company": "Practo",
+        "product": null,
+        "category": "Account Issue",
+        "department": "Technical Support",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "High"
+      },
+      "notes": "Priority elevated by the appointment deadline."
+    },
+    {
+      "id": "eval-033",
+      "industry": "Healthcare",
+      "difficulty": "medium",
+      "complaint": "We waited four and a half hours in the Manipal Hospital emergency room with my son who had a suspected fracture, while walk-ins who arrived after us were seen first. No triage explanation, no updates, nothing. He was in pain the entire time.",
+      "expected": {
+        "company": "Manipal Hospital",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      }
+    },
+    {
+      "id": "eval-034",
+      "industry": "Healthcare",
+      "difficulty": "medium",
+      "complaint": "Thyrocare promised my full-body checkup results within 48 hours. It has been nine days. Every time I call, I'm told the samples are 'in processing'. If the samples were spoiled, just tell me so I can get retested instead of stringing me along.",
+      "expected": {
+        "company": "Thyrocare",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-035",
+      "industry": "Healthcare",
+      "difficulty": "hard",
+      "complaint": "My 74-year-old mother spent two weeks being treated for 'acidity' at Columbia Care Hospital while her actual condition — a heart blockage the ECG apparently showed on day one — went unmentioned. We only found out when we took her records for a second opinion. She could have died. And after all that, they still sent us a bill with charges for a cardiology consult that never happened.",
+      "expected": {
+        "company": "Columbia Care Hospital",
+        "product": null,
+        "category": "Safety Concern",
+        "department": "Safety & Compliance",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Emotionally loaded narrative mixing a missed diagnosis (primary, safety) with a billing error (secondary). Billing Issue alone is an under-read."
+    },
+    {
+      "id": "eval-036",
+      "industry": "Healthcare",
+      "difficulty": "hard",
+      "complaint": "Loved the valet parking at Wockhardt Hospital, five stars, very smooth. The ₹42,000 charged twice for the same MRI scan, slightly less smooth. Two calls to billing so far and everyone agrees it's a duplicate, yet somehow nobody can actually reverse it.",
+      "expected": {
+        "company": "Wockhardt Hospital",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "The praise is a sarcastic setup; the real complaint is the duplicate MRI charge."
+    },
+    {
+      "id": "eval-037",
+      "industry": "Healthcare",
+      "difficulty": "ambiguous",
+      "complaint": "Not sure this even counts as a complaint, but my dentist runs at least 30 minutes late every single visit. The dentistry itself is excellent. Should I say something or is this just how clinics are?",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Neutral",
+        "severity": "Low",
+        "priority": "Low"
+      },
+      "notes": "Hedged, mixed, no named provider. General Complaint is an acceptable alternate."
+    },
+    {
+      "id": "eval-038",
+      "industry": "Hotels",
+      "difficulty": "easy",
+      "complaint": "Our room at the Marriott Whitefield was filthy on arrival — stained sheets, hair in the bathroom, and a lingering smell of smoke in a supposedly non-smoking room. Housekeeping took three hours to respond. This is not the standard we paid for.",
+      "expected": {
+        "company": "Marriott",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-039",
+      "industry": "Hotels",
+      "difficulty": "easy",
+      "complaint": "Hilton charged me $86 for minibar items I never touched. I reported the discrepancy at checkout, the front desk promised a correction, and the full amount still appeared on my card statement a week later.",
+      "expected": {
+        "company": "Hilton",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-040",
+      "industry": "Hotels",
+      "difficulty": "easy",
+      "complaint": "OYO cancelled my confirmed booking in Jaipur the night before check-in with a one-line SMS and no alternative arrangement. I was travelling with two children and had to find a room at midnight at double the price. I want a refund plus the price difference.",
+      "expected": {
+        "company": "OYO",
+        "product": null,
+        "category": "Booking & Reservation",
+        "department": "Reservations",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      }
+    },
+    {
+      "id": "eval-041",
+      "industry": "Hotels",
+      "difficulty": "medium",
+      "complaint": "We booked the Taj resort in Goa for our honeymoon and had no hot water for three of the five nights. Maintenance visited twice, said it was fixed, and it wasn't. For the rate this property charges, a working geyser should not be a luxury.",
+      "expected": {
+        "company": "Taj",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-042",
+      "industry": "Hotels",
+      "difficulty": "medium",
+      "complaint": "Radisson took a ₹10,000 security deposit at check-in and promised release within 7 days of checkout. It's been 26 days. The hotel says the bank is holding it; my bank says no hold exists and the hotel simply hasn't initiated the release.",
+      "expected": {
+        "company": "Radisson",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-043",
+      "industry": "Hotels",
+      "difficulty": "medium",
+      "complaint": "The 'sea view suite' I booked on the ITC website turned out to be a small room facing a construction site — the sea is technically visible if you lean off the balcony. This is not the room in the photos I paid a premium for. I asked to be moved or refunded the difference and got neither.",
+      "expected": {
+        "company": "ITC",
+        "product": null,
+        "category": "Booking & Reservation",
+        "department": "Reservations",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "Service Quality is an acceptable alternate — the core dispute is what was booked vs what was delivered."
+    },
+    {
+      "id": "eval-044",
+      "industry": "Hotels",
+      "difficulty": "hard",
+      "complaint": "A truly immersive stay at the Grand Palace Resort. The 2am fire alarm (false, naturally) provided the adrenaline, the broken AC provided the sauna experience, and the breakfast buffet provided the food poisoning. All inclusive indeed. My compliments to whoever is still charging five stars' worth for this.",
+      "expected": {
+        "company": "Grand Palace Resort",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Full-sarcasm register with a genuine health incident (food poisoning) buried inside. Safety Concern is an acceptable alternate."
+    },
+    {
+      "id": "eval-045",
+      "industry": "Hotels",
+      "difficulty": "hard",
+      "complaint": "During our stay at the Lemon Tree in Manali I noticed the balcony railing of our third-floor room was completely loose — it moved several inches when leaned on. We were travelling with a toddler. The front desk logged it, nobody came, and at checkout the manager shrugged and said 'the building is old'. Someone is going to fall.",
+      "expected": {
+        "company": "Lemon Tree",
+        "product": null,
+        "category": "Safety Concern",
+        "department": "Safety & Compliance",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "The dismissive staff response is secondary; the loose railing is a reportable safety hazard."
+    },
+    {
+      "id": "eval-046",
+      "industry": "Hotels",
+      "difficulty": "ambiguous",
+      "complaint": "Is a 'resort fee' of $45 per night on top of the room rate normal in Vegas? It wasn't shown until the final payment page. Maybe I just missed it, but it feels like it should have been in the headline price.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Neutral",
+        "severity": "Low",
+        "priority": "Low"
+      },
+      "notes": "Question about industry practice with a latent drip-pricing grievance. General Complaint is an acceptable alternate."
+    },
+    {
+      "id": "eval-047",
+      "industry": "Airlines",
+      "difficulty": "easy",
+      "complaint": "IndiGo lost my checked bag on flight 6E-345 from Delhi to Bangalore on July 2nd. It has been twelve days, the tracking reference they gave me shows nothing, and the baggage desk has stopped responding to my emails. The bag contains my medications.",
+      "expected": {
+        "company": "IndiGo",
+        "product": null,
+        "category": "Baggage Issue",
+        "department": "Baggage Services",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      }
+    },
+    {
+      "id": "eval-048",
+      "industry": "Airlines",
+      "difficulty": "easy",
+      "complaint": "Air India cancelled my Mumbai–London flight in May and I chose a full refund. Their own policy says 7 working days. Two months later I'm still waiting, and every call ends with 'the refund has been initiated'. Initiated to where?",
+      "expected": {
+        "company": "Air India",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-049",
+      "industry": "Airlines",
+      "difficulty": "easy",
+      "complaint": "A cabin crew member on my SpiceJet flight yesterday was openly rude to an elderly passenger who needed help with the overhead bin, and then snapped at me when I offered to help. Flight SG-8156, seat 14C. Basic decency shouldn't be a premium add-on.",
+      "expected": {
+        "company": "SpiceJet",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-050",
+      "industry": "Airlines",
+      "difficulty": "medium",
+      "complaint": "The Vistara website and app both refuse to check me in for tomorrow's flight — every attempt ends with 'PNR not found' even though the booking confirmation and payment receipt are sitting in my inbox. The call center queue disconnects after 40 minutes. I fly in 18 hours.",
+      "expected": {
+        "company": "Vistara",
+        "product": null,
+        "category": "Account Issue",
+        "department": "Technical Support",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "High"
+      },
+      "notes": "Priority elevated by the imminent departure."
+    },
+    {
+      "id": "eval-051",
+      "industry": "Airlines",
+      "difficulty": "medium",
+      "complaint": "Lufthansa delayed my Frankfurt connection by nine hours, which made me miss a business meeting that was the entire purpose of the trip. Gate staff refused meal vouchers saying the delay was 'weather-related' while the pilot had announced a technical fault. I want compensation under EU261.",
+      "expected": {
+        "company": "Lufthansa",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      }
+    },
+    {
+      "id": "eval-052",
+      "industry": "Airlines",
+      "difficulty": "medium",
+      "complaint": "Akasa Air charged me ₹1,400 for seat selection that their promotional email explicitly said was free with my fare class. Screenshot attached. Small amount, but it's the principle — honor your own promotions.",
+      "expected": {
+        "company": "Akasa Air",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Low",
+        "priority": "Low"
+      }
+    },
+    {
+      "id": "eval-053",
+      "industry": "Airlines",
+      "difficulty": "hard",
+      "complaint": "Huge thanks to United for the surprise 14-hour layover in Denver — nothing says 'premium economy' like sleeping on airport carpet. Special mention to the rebooking desk for offering me a middle seat two days later as 'the best available option'. Truly the friendly skies.",
+      "expected": {
+        "company": "United",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Sustained sarcasm ('huge thanks', 'truly the friendly skies') over a serious disruption."
+    },
+    {
+      "id": "eval-054",
+      "industry": "Airlines",
+      "difficulty": "hard",
+      "complaint": "On my GoFirst flight last Tuesday there was a distinct smell of smoke in the rear cabin during descent. Passengers around row 28 noticed it too. The crew told us it was 'normal air conditioning smell' and moved on. I've flown weekly for a decade — that was not air conditioning. Nobody took names or filed anything as far as I could see.",
+      "expected": {
+        "company": "GoFirst",
+        "product": null,
+        "category": "Safety Concern",
+        "department": "Safety & Compliance",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "A calm, measured tone describing a potentially serious in-flight safety event — severity must come from content, not emotional intensity."
+    },
+    {
+      "id": "eval-055",
+      "industry": "Airlines",
+      "difficulty": "ambiguous",
+      "complaint": "Do airlines owe you anything for a two-hour domestic delay? Happened to me twice this month on different carriers. Not a huge deal, mostly curious what the rules are.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "General Complaint",
+        "department": "Customer Support",
+        "sentiment": "Neutral",
+        "severity": "Low",
+        "priority": "Low"
+      },
+      "notes": "Policy question, explicitly 'not a huge deal', no single company."
+    },
+    {
+      "id": "eval-056",
+      "industry": "Telecom",
+      "difficulty": "easy",
+      "complaint": "My Jio fiber connection has been completely dead for five days. Three service requests, three automated closures claiming 'issue resolved', zero technician visits. I work from home and this outage is costing me income every single day.",
+      "expected": {
+        "company": "Jio",
+        "product": null,
+        "category": "Product Failure",
+        "department": "Customer Support",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      }
+    },
+    {
+      "id": "eval-057",
+      "industry": "Telecom",
+      "difficulty": "easy",
+      "complaint": "Airtel billed me ₹7,800 for international roaming during a week when I was in Mumbai the entire time — my phone never left the country. The itemized bill shows data usage 'in Singapore'. Fix your tower handoff logging and reverse these charges.",
+      "expected": {
+        "company": "Airtel",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-058",
+      "industry": "Telecom",
+      "difficulty": "easy",
+      "complaint": "The staff at the Vodafone store in Koramangala were dismissive and rude when I came in to resolve a SIM activation issue. One employee laughed with a colleague while I was mid-sentence. I left after 45 minutes with nothing resolved.",
+      "expected": {
+        "company": "Vodafone",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-059",
+      "industry": "Telecom",
+      "difficulty": "medium",
+      "complaint": "I applied to port my number from BSNL three weeks ago. The UPC code expired twice because nobody processed the request, and now I'm told to 'start again'. Meanwhile I'm paying two providers for one working number.",
+      "expected": {
+        "company": "BSNL",
+        "product": null,
+        "category": "Account Issue",
+        "department": "Technical Support",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-060",
+      "industry": "Telecom",
+      "difficulty": "medium",
+      "complaint": "For the fourth month running, a ₹99 'caller tunes' subscription I never signed up for has appeared on my Airtel bill. I cancel it, I'm refunded, and next month it re-subscribes itself. Either your system has a bug or someone is farming these charges deliberately.",
+      "expected": {
+        "company": "Airtel",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "Recurring unauthorized VAS charge — Fraud & Security is an acceptable alternate."
+    },
+    {
+      "id": "eval-061",
+      "industry": "Telecom",
+      "difficulty": "medium",
+      "complaint": "I pay for the 300 Mbps ACT Fibernet plan and consistently measure 15–30 Mbps in the evenings, every evening, on a wired connection. Support's answer is always 'restart the router'. I've restarted it more times than I've had hot dinners. Give me the speed I pay for or downgrade my bill.",
+      "expected": {
+        "company": "ACT Fibernet",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-062",
+      "industry": "Telecom",
+      "difficulty": "hard",
+      "complaint": "Really enjoying Vi's world-class 5G experience — three dropped calls before breakfast, video that buffers like it's 2009, and a signal that vanishes the moment I step into my kitchen. But the billboards look great, so priorities are clearly in order.",
+      "expected": {
+        "company": "Vi",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "Sarcastic praise ('world-class', 'look great') wrapping a chronic network-quality complaint. Product Failure is an acceptable alternate."
+    },
+    {
+      "id": "eval-063",
+      "industry": "Telecom",
+      "difficulty": "hard",
+      "complaint": "Someone walked into a Jio store with a fake ID, got a duplicate SIM for my number issued, and within two hours ₹1.2 lakh moved out of my bank account through OTPs sent to 'my' phone. Your store verified nothing. The police report is filed; I need Jio's SIM issuance records for the investigation and I need to understand how this was allowed to happen.",
+      "expected": {
+        "company": "Jio",
+        "product": null,
+        "category": "Fraud & Security",
+        "department": "Fraud & Security",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "SIM-swap fraud narrative; the financial loss happened at the bank but the failure being complained about is the telecom's identity verification."
+    },
+    {
+      "id": "eval-064",
+      "industry": "Telecom",
+      "difficulty": "ambiguous",
+      "complaint": "Thinking of switching providers. The coverage at my new flat seems weak — one or two bars indoors — but outdoor coverage is fine. Is that a network problem or just my building's concrete? Anyone else in Indiranagar face this?",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "General Complaint",
+        "department": "Customer Support",
+        "sentiment": "Neutral",
+        "severity": "Low",
+        "priority": "Low"
+      },
+      "notes": "Musing rather than a complaint; no provider named. Service Quality is an acceptable alternate."
+    },
+    {
+      "id": "eval-065",
+      "industry": "Retail",
+      "difficulty": "easy",
+      "complaint": "Amazon delivered my glass cookware set shattered — the box looked like it had been dropped from a height, no fragile stickers, no padding. Order #171-4492. I want a replacement with proper packaging this time.",
+      "expected": {
+        "company": "Amazon",
+        "product": null,
+        "category": "Delivery Issue",
+        "department": "Logistics",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-066",
+      "industry": "Retail",
+      "difficulty": "easy",
+      "complaint": "Flipkart picked up my returned washing machine on June 12th and confirmed the refund of ₹24,990 'within 7 days'. It is July 15th. The order page says refund completed; my bank statement says otherwise. Where is my money?",
+      "expected": {
+        "company": "Flipkart",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-067",
+      "industry": "Retail",
+      "difficulty": "easy",
+      "complaint": "The staff at the Zara store in Phoenix Mall were flat-out rude when I tried to exchange a shirt with tags intact and receipt in hand. The floor manager talked over me and implied I'd worn it. I've shopped there for years — never again if this is the standard.",
+      "expected": {
+        "company": "Zara",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-068",
+      "industry": "Retail",
+      "difficulty": "medium",
+      "complaint": "This is the second time Myntra has sent me the wrong size for the same order. I ordered a medium, received XL, returned it, and the 'replacement' that arrived is... another XL. Each round trip takes ten days. At this rate the jacket will be out of season before I can wear it.",
+      "expected": {
+        "company": "Myntra",
+        "product": null,
+        "category": "Delivery Issue",
+        "department": "Logistics",
+        "sentiment": "Negative",
+        "severity": "Low",
+        "priority": "Medium"
+      },
+      "notes": "Repeated fulfilment error; Product Failure is an acceptable alternate reading."
+    },
+    {
+      "id": "eval-069",
+      "industry": "Retail",
+      "difficulty": "medium",
+      "complaint": "My IKEA PAX wardrobe arrived with the hinge pack and one side panel missing — 6 of 14 boxes, apparently, is close enough. The spare parts order they placed will take 'four to six weeks'. Meanwhile half a wardrobe is lying across my bedroom floor.",
+      "expected": {
+        "company": "IKEA",
+        "product": "IKEA PAX",
+        "category": "Product Failure",
+        "department": "Customer Support",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "Missing components in a delivered product — Delivery Issue is an acceptable alternate."
+    },
+    {
+      "id": "eval-070",
+      "industry": "Retail",
+      "difficulty": "medium",
+      "complaint": "The ₹5,000 gift card balance in my Shoppers Stop account shows zero, but I've only ever spent ₹1,200 of it — I have the original card and the single receipt. Customer care says balances 'cannot be audited retrospectively'. That's not an answer, that's a shrug.",
+      "expected": {
+        "company": "Shoppers Stop",
+        "product": null,
+        "category": "Account Issue",
+        "department": "Technical Support",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "Fraud & Security is an acceptable alternate if the missing balance is read as theft."
+    },
+    {
+      "id": "eval-071",
+      "industry": "Retail",
+      "difficulty": "hard",
+      "complaint": "Shoutout to BigBasket's 'express 90-minute delivery' — my groceries arrived a casual 11 hours later, at 1am, left with the security guard, ice cream and all. The ice cream is now a beverage. Truly redefining express.",
+      "expected": {
+        "company": "BigBasket",
+        "product": null,
+        "category": "Delivery Issue",
+        "department": "Logistics",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "Sarcasm ('shoutout', 'truly redefining') over a failed delivery promise and spoiled goods."
+    },
+    {
+      "id": "eval-072",
+      "industry": "Retail",
+      "difficulty": "hard",
+      "complaint": "The 'Ray-Ban' sunglasses I bought from a top-rated seller on Snapdeal arrived with misaligned printing on the logo, no serial number etched on the lens, and packaging that doesn't match anything on Ray-Ban's official site. I paid full retail price for what I'm now fairly certain is counterfeit. This seller has 4,000 reviews — how many other people have been sold fakes?",
+      "expected": {
+        "company": "Snapdeal",
+        "product": null,
+        "category": "Fraud & Security",
+        "department": "Fraud & Security",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Counterfeit allegation against a marketplace seller. The accountable company is the marketplace (Snapdeal), not Ray-Ban."
+    },
+    {
+      "id": "eval-073",
+      "industry": "Retail",
+      "difficulty": "ambiguous",
+      "complaint": "Love shopping at Decathlon, been going for years. The loyalty app though — logging in takes three attempts, points show up days late, and half the offers won't scan at the till. Not the end of the world, just clunky. Thought someone should know.",
+      "expected": {
+        "company": "Decathlon",
+        "product": null,
+        "category": "Account Issue",
+        "department": "Technical Support",
+        "sentiment": "Neutral",
+        "severity": "Low",
+        "priority": "Low"
+      },
+      "notes": "Warm overall tone with mild product feedback; 'Negative' sentiment and General Complaint are acceptable alternates."
+    },
+    {
+      "id": "eval-074",
+      "industry": "Food Delivery",
+      "difficulty": "easy",
+      "complaint": "My Swiggy order arrived 50 minutes late, stone cold, and missing the biryani — which was the main dish. The app's chat support closed my ticket with a ₹40 coupon. I paid ₹610 for a meal I mostly didn't receive.",
+      "expected": {
+        "company": "Swiggy",
+        "product": null,
+        "category": "Delivery Issue",
+        "department": "Logistics",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-075",
+      "industry": "Food Delivery",
+      "difficulty": "easy",
+      "complaint": "Zomato charged my card ₹843 but the order never went through — the app crashed at the payment step and there's no order in my history. The money left my account instantly; apparently getting it back takes 'up to 7 business days'. Funny how that works.",
+      "expected": {
+        "company": "Zomato",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-076",
+      "industry": "Food Delivery",
+      "difficulty": "easy",
+      "complaint": "The Uber Eats delivery driver was aggressive and rude when I asked him to leave the order at the door as per the delivery instructions. He rang the bell repeatedly, woke my baby, and then argued with me on the doorstep. Completely unnecessary.",
+      "expected": {
+        "company": "Uber Eats",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-077",
+      "industry": "Food Delivery",
+      "difficulty": "medium",
+      "complaint": "I ordered chicken shawarma from a restaurant on Swiggy on Saturday night and spent Sunday in bed with vomiting and fever. My flatmate ordered the same dish and had identical symptoms. The restaurant is still listed and taking orders. Someone should look into their kitchen before more people get sick.",
+      "expected": {
+        "company": "Swiggy",
+        "product": null,
+        "category": "Safety Concern",
+        "department": "Safety & Compliance",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Suspected food poisoning with corroboration — a platform-level food-safety escalation, not a refund request."
+    },
+    {
+      "id": "eval-078",
+      "industry": "Food Delivery",
+      "difficulty": "medium",
+      "complaint": "Zomato promised a refund for my cancelled order on June 20th — 'within 7 days', said the email. Three weeks and four support chats later, each agent confirms the refund is 'in process' and asks me to wait another 48 hours. It's ₹1,240. How long can ₹1,240 be in process?",
+      "expected": {
+        "company": "Zomato",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-079",
+      "industry": "Food Delivery",
+      "difficulty": "medium",
+      "complaint": "The Dunzo app crashes at checkout every single time I try to pay with UPI — has done for two weeks, on two different phones. Card payments work, but UPI is how I pay for everything. I've reinstalled, cleared cache, done the whole ritual. It's the app.",
+      "expected": {
+        "company": "Dunzo",
+        "product": null,
+        "category": "Account Issue",
+        "department": "Technical Support",
+        "sentiment": "Negative",
+        "severity": "Low",
+        "priority": "Medium"
+      },
+      "notes": "App defect at payment step; Product Failure is an acceptable alternate."
+    },
+    {
+      "id": "eval-080",
+      "industry": "Food Delivery",
+      "difficulty": "hard",
+      "complaint": "Ordered hot soup from Domino's, received an artisanal gazpacho experience instead — 70 minutes in transit will do that. The 'piping hot guarantee' badge on the listing was a lovely decorative touch. And the garlic bread apparently achieved liberation somewhere en route, since it never arrived at all.",
+      "expected": {
+        "company": "Domino's",
+        "product": null,
+        "category": "Delivery Issue",
+        "department": "Logistics",
+        "sentiment": "Negative",
+        "severity": "Low",
+        "priority": "Medium"
+      },
+      "notes": "Sarcasm throughout ('artisanal gazpacho', 'achieved liberation'); the substance is a late delivery with a missing item."
+    },
+    {
+      "id": "eval-081",
+      "industry": "Food Delivery",
+      "difficulty": "hard",
+      "complaint": "I have a severe peanut allergy and wrote it in the order notes in capital letters, and picked a dish the menu listed as nut-free. What arrived was garnished with crushed peanuts. One bite and my throat started closing — I used my EpiPen and spent the night in the ER. The restaurant said the app 'doesn't show them order notes'. If that's true, your platform is going to kill someone.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "Safety Concern",
+        "department": "Safety & Compliance",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Life-threatening allergen failure; the platform is unnamed, so company is null. The systemic claim (order notes not passed to restaurants) makes this a platform-level safety escalation."
+    },
+    {
+      "id": "eval-082",
+      "industry": "Food Delivery",
+      "difficulty": "ambiguous",
+      "complaint": "Why does the delivery fee on the same restaurant, same distance, same time of day change every single day? Monday it's ₹20, Tuesday it's ₹55, today it's 'free' but the dishes all cost ₹15 more. Not exactly a complaint, I'd just genuinely like to understand the logic.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Neutral",
+        "severity": "Low",
+        "priority": "Low"
+      },
+      "notes": "Pricing-transparency question, explicitly 'not exactly a complaint'. General Complaint is an acceptable alternate."
+    },
+    {
+      "id": "eval-083",
+      "industry": "Government",
+      "difficulty": "easy",
+      "complaint": "My passport renewal application (file number BLR-2026-118844) has been stuck at 'police verification pending' for six months. Verification was actually completed in February — the officer gave me a receipt. Every enquiry at the Passport Seva Kendra returns the same scripted answer. I have international travel booked for September.",
+      "expected": {
+        "company": "Passport Seva Kendra",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "High"
+      }
+    },
+    {
+      "id": "eval-084",
+      "industry": "Government",
+      "difficulty": "easy",
+      "complaint": "The clerk at the RTO office in Rajajinagar demanded I go through an 'agent' for my licence renewal and refused to accept my direct application, telling me it would 'take a very long time' otherwise. This is open harassment of citizens who follow the official process.",
+      "expected": {
+        "company": "RTO",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Implied solicitation of a bribe; Fraud & Security is an acceptable alternate."
+    },
+    {
+      "id": "eval-085",
+      "industry": "Government",
+      "difficulty": "easy",
+      "complaint": "The BBMP property tax portal charged my card twice for the same assessment year — two identical debits of ₹14,730 within a minute of each other. The receipt page only acknowledges one payment. I need the duplicate reversed.",
+      "expected": {
+        "company": "BBMP",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-086",
+      "industry": "Government",
+      "difficulty": "medium",
+      "complaint": "My mother's widow pension has not been credited for two months. The bank says the disbursal never arrived; the pension office says it was 'processed'. She is 68 and this pension is her only income. Someone between these two offices is sitting on her money.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "No single accountable office named — company is null. Claim Dispute is an acceptable alternate category."
+    },
+    {
+      "id": "eval-087",
+      "industry": "Government",
+      "difficulty": "medium",
+      "complaint": "The municipal water board's online portal will not let me register — the OTP arrives after the 60-second window expires, every time, on two different networks. Without registration I can't raise a complaint about my actual problem, which is that we've had no water supply on Tuesdays for a month.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "Account Issue",
+        "department": "Technical Support",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "Two nested issues: the portal defect (blocking) and the water supply. The portal is what's actionable here; Service Quality is an acceptable alternate."
+    },
+    {
+      "id": "eval-088",
+      "industry": "Government",
+      "difficulty": "hard",
+      "complaint": "The pothole at the 80 Feet Road / 9th Main junction has been reported to the corporation helpline four times since March — I have all four complaint numbers. Last week a scooterist swerved to avoid it and was hit by a bus; he's in hospital. The pothole is now marked with a helpful ring of painted stones, which is apparently the full extent of the repair budget. How many more people need to get hurt?",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "Safety Concern",
+        "department": "Safety & Compliance",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Sarcasm ('helpful ring of painted stones') within a documented public-safety hazard that has already caused an injury."
+    },
+    {
+      "id": "eval-089",
+      "industry": "Government",
+      "difficulty": "hard",
+      "complaint": "While downloading my property registration documents from the state land records portal, I noticed the URL contains a plain sequential ID. Changing the number by one shows me other citizens' complete documents — full names, Aadhaar numbers, addresses, signatures. I verified this with three consecutive IDs and stopped. This is millions of people's identity documents sitting in the open.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "Data Privacy",
+        "department": "Privacy Office",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "A responsible-disclosure style report of a mass data exposure (IDOR). Calm tone; severity must come from impact. Fraud & Security is an acceptable alternate."
+    },
+    {
+      "id": "eval-090",
+      "industry": "Government",
+      "difficulty": "ambiguous",
+      "complaint": "Roughly how long does a driving licence renewal take these days if the documents are all in order? A friend said two weeks, the website says 30 days, the office told me 'it depends'. Planning a road trip in August so trying to figure out if I should expedite.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "General Complaint",
+        "department": "Customer Support",
+        "sentiment": "Neutral",
+        "severity": "Low",
+        "priority": "Low"
+      },
+      "notes": "Timeline question, not a grievance — though the inconsistent answers hint at a latent service issue."
+    },
+    {
+      "id": "eval-091",
+      "industry": "Government",
+      "difficulty": "ambiguous",
+      "complaint": "Credit where due — the new income tax portal is much faster than the old one and e-verification took seconds. That said, my refund from last assessment year is still showing 'processed' without ever reaching my bank account. Eleven months now. Mostly happy with the direction, still missing my money.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Neutral",
+        "severity": "Medium",
+        "priority": "Medium"
+      },
+      "notes": "Genuinely mixed: sincere praise plus an 11-month missing refund. Negative sentiment is an acceptable alternate."
+    },
+    {
+      "id": "eval-092",
+      "industry": "Education",
+      "difficulty": "easy",
+      "complaint": "Manipal University's fee portal charged my tuition twice for the fall semester — ₹1,05,000 debited on two consecutive days for the same invoice number. The accounts office acknowledged the duplicate three weeks ago and nothing has moved since.",
+      "expected": {
+        "company": "Manipal University",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-093",
+      "industry": "Education",
+      "difficulty": "easy",
+      "complaint": "I paid for the Coursera Plus annual plan five days ago and my account still shows the free tier. Every course I open asks me to pay again. The payment went through — I have the receipt and the card statement. Just unlock what I paid for.",
+      "expected": {
+        "company": "Coursera",
+        "product": "Coursera Plus",
+        "category": "Account Issue",
+        "department": "Technical Support",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-094",
+      "industry": "Education",
+      "difficulty": "easy",
+      "complaint": "The administrative staff at Delhi Public School's admissions office were rude and dismissive during our campus visit — they talked down to my wife, refused to answer basic questions about the fee structure, and made us feel like an inconvenience. First impressions matter.",
+      "expected": {
+        "company": "Delhi Public School",
+        "product": null,
+        "category": "Service Quality",
+        "department": "Customer Experience",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-095",
+      "industry": "Education",
+      "difficulty": "medium",
+      "complaint": "My merit scholarship for this academic year was approved in writing by the college in April, with disbursement promised 'before the semester begins'. The semester began five weeks ago. The scholarship cell, the accounts office, and the dean's office each say the file is with one of the other two. I've paid full fees out of pocket in the meantime.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "High"
+      },
+      "notes": "College not named — company is null. Claim Dispute is an acceptable alternate."
+    },
+    {
+      "id": "eval-096",
+      "industry": "Education",
+      "difficulty": "medium",
+      "complaint": "The Testbook exam platform crashed 40 minutes into my proctored mock final and marked the attempt as 'malpractice — window switched' when it was their own app that closed. That flag is now on my profile and support says flags 'cannot be removed'. I did nothing wrong; your software failed and blamed me for it.",
+      "expected": {
+        "company": "Testbook",
+        "product": null,
+        "category": "Product Failure",
+        "department": "Customer Support",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Platform crash with an unjust consequence attached (a misconduct flag) — severity comes from the consequence, not the crash."
+    },
+    {
+      "id": "eval-097",
+      "industry": "Education",
+      "difficulty": "medium",
+      "complaint": "I completed upGrad's data science program in March and the physical certificate — which the program page prominently advertises — has not arrived four months later. The digital copy exists, but my employer's verification process requires the original. Support alternates between 'it's printed' and 'it's dispatched' depending on who answers.",
+      "expected": {
+        "company": "upGrad",
+        "product": null,
+        "category": "Delivery Issue",
+        "department": "Logistics",
+        "sentiment": "Negative",
+        "severity": "Low",
+        "priority": "Medium"
+      }
+    },
+    {
+      "id": "eval-098",
+      "industry": "Education",
+      "difficulty": "hard",
+      "complaint": "Byju's promised a 'full refund, no questions asked' within the trial window. I cancelled on day 9 of 15. That was in February. Since then: eleven calls, two emails 'escalating' my case, one counselor who tried to talk me into a cheaper course instead, and zero rupees refunded. The no-questions-asked refund has so far involved answering roughly two hundred questions.",
+      "expected": {
+        "company": "Byju's",
+        "product": null,
+        "category": "Billing Issue",
+        "department": "Billing & Payments",
+        "sentiment": "Negative",
+        "severity": "Medium",
+        "priority": "High"
+      },
+      "notes": "Dry sarcasm in the closing line; the substance is a contractual refund withheld for five months with retention-pressure tactics."
+    },
+    {
+      "id": "eval-099",
+      "industry": "Education",
+      "difficulty": "hard",
+      "complaint": "My daughter reported to her hostel warden that a senior student has been threatening juniors into 'lending' them money, and the warden's response was that she should 'adjust and not create issues'. Two other parents have told me privately their kids faced the same thing. The college's anti-ragging committee exists on paper — the email address on the notice board bounces. I am one more dismissal away from going to the police.",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "Safety Concern",
+        "department": "Safety & Compliance",
+        "sentiment": "Negative",
+        "severity": "High",
+        "priority": "High"
+      },
+      "notes": "Ragging/extortion with institutional dismissal — a student-safety escalation. The college is unnamed, so company is null."
+    },
+    {
+      "id": "eval-100",
+      "industry": "Education",
+      "difficulty": "ambiguous",
+      "complaint": "Halfway through an online certification and having second thoughts — some of the course content references tools that were deprecated years ago. The instructor is engaging though, and I've definitely learned things. Is asking for a partial refund unreasonable at this point, or should I just finish it?",
+      "expected": {
+        "company": null,
+        "product": null,
+        "category": "General Complaint",
+        "department": "Customer Support",
+        "sentiment": "Neutral",
+        "severity": "Low",
+        "priority": "Low"
+      },
+      "notes": "Deliberating rather than complaining; provider unnamed. Billing Issue is an acceptable alternate if read as a refund request."
+    }
+  ]
+}

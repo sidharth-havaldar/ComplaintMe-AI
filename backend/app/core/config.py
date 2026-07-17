@@ -48,6 +48,10 @@ class Settings(BaseSettings):
     # Swappable without code changes; "heuristic" is the dependency-free V1 engine.
     CORTEXA_PROVIDER: str = "heuristic"
 
+    # Consumer Copilot drafting engine (see app.copilot.factory). Separate from
+    # Cortexa: Copilot prepares complaints, Cortexa analyzes them.
+    COPILOT_PROVIDER: str = "heuristic"
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def database_url(self) -> str:

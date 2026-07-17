@@ -8,7 +8,7 @@ export function toFriendlyAuthError(message: string): string {
     return "Please confirm your email address before signing in.";
   }
   if (normalized.includes("already registered")) {
-    return "An account with this email already exists.";
+    return "This email already has an account. Please sign in instead.";
   }
   if (normalized.includes("password should be at least")) {
     return "Password must be at least 8 characters.";

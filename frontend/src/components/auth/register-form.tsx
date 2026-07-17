@@ -22,7 +22,12 @@ type FieldErrors = {
   confirmPassword?: string;
 };
 
-export function RegisterForm() {
+type RegisterFormProps = {
+  /** Called with the submitted email when a verification email has been sent. */
+  onConfirmationSent: (email: string) => void;
+};
+
+export function RegisterForm({ onConfirmationSent }: RegisterFormProps) {
   const router = useRouter();
 
   const [fullName, setFullName] = React.useState("");
@@ -32,7 +37,6 @@ export function RegisterForm() {
   const [fieldErrors, setFieldErrors] = React.useState<FieldErrors>({});
   const [formError, setFormError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [confirmationSent, setConfirmationSent] = React.useState(false);
 
   function validate(): boolean {
     const errors: FieldErrors = {};
@@ -93,7 +97,7 @@ export function RegisterForm() {
       // Supabase obfuscates duplicate sign-ups: an existing confirmed email
       // returns a user with no identities instead of an error.
       if (data.user && data.user.identities?.length === 0) {
-        setFormError("An account with this email already exists.");
+        setFormError("This email already has an account. Please sign in instead.");
         return;
       }
 
@@ -103,22 +107,13 @@ export function RegisterForm() {
         return;
       }
 
-      // Email confirmation enabled — instruct the user, do not redirect.
-      setConfirmationSent(true);
+      // Email confirmation enabled — show the verification screen, do not redirect.
+      onConfirmationSent(email.trim());
     } catch {
       setFormError("Unable to reach the authentication service. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  }
-
-  if (confirmationSent) {
-    return (
-      <FormAlert variant="success">
-        Account created. We&apos;ve sent a confirmation link to <strong>{email.trim()}</strong> —
-        please verify your email to finish setting up your account.
-      </FormAlert>
-    );
   }
 
   return (

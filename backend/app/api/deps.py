@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.services.complaint import ComplaintService
+from app.services.copilot import CopilotService
 
 # Stand-in for the authenticated user until AUTH-002 wires real Supabase JWT
 # verification into ``app.auth``. The Complaint API assumes an authenticated
@@ -28,5 +29,11 @@ def get_complaint_service(
     return ComplaintService(session)
 
 
+def get_copilot_service() -> CopilotService:
+    """Provide the stateless Consumer Copilot drafting service (COP-002)."""
+    return CopilotService()
+
+
 CurrentUserId = Annotated[uuid.UUID, Depends(get_current_user_id)]
 ComplaintServiceDep = Annotated[ComplaintService, Depends(get_complaint_service)]
+CopilotServiceDep = Annotated[CopilotService, Depends(get_copilot_service)]

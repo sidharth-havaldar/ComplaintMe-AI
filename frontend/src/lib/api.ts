@@ -91,12 +91,15 @@ async function buildHeaders(): Promise<Record<string, string>> {
   return headers;
 }
 
-/** Create a complaint from a free-text description and return the saved record. */
-export async function createComplaint(description: string): Promise<Complaint> {
+/**
+ * Create a complaint and return the saved record. `title` (optional) carries
+ * the professional draft's subject line when submitting via Consumer Copilot.
+ */
+export async function createComplaint(description: string, title?: string): Promise<Complaint> {
   const response = await fetch(`${API_BASE_URL}/complaints`, {
     method: "POST",
     headers: await buildHeaders(),
-    body: JSON.stringify({ description }),
+    body: JSON.stringify(title ? { description, title } : { description }),
   });
 
   if (!response.ok) {
@@ -135,6 +138,41 @@ export class ComplaintNotFoundError extends Error {
     super(`Complaint ${id} was not found.`);
     this.name = "ComplaintNotFoundError";
   }
+}
+
+/**
+ * A professional complaint draft produced by Consumer Copilot (COP-002).
+ * Every fact comes from the user's own story; missing information appears as
+ * explicit placeholders (e.g. "[Company Name]"), never as guesses.
+ */
+export type ComplaintDraft = {
+  subject: string;
+  recipient: string;
+  summary: string;
+  timeline: string[];
+  body: string;
+  requested_resolution: string;
+  provider: string;
+  model: string;
+};
+
+/**
+ * Ask Consumer Copilot to turn a natural story into a professional complaint
+ * draft. Stateless: nothing is stored until the user reviews the draft and
+ * submits it via {@link createComplaint}.
+ */
+export async function draftComplaint(story: string): Promise<ComplaintDraft> {
+  const response = await fetch(`${API_BASE_URL}/copilot/draft`, {
+    method: "POST",
+    headers: await buildHeaders(),
+    body: JSON.stringify({ story }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to draft complaint (status ${response.status}).`);
+  }
+
+  return (await response.json()) as ComplaintDraft;
 }
 
 /**
